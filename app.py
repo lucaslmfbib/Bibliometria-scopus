@@ -126,7 +126,8 @@ def main() -> None:
     st.markdown(
         "Por **Lucas Martins**  \n"
         "GitHub: [@lucaslmfbib](https://github.com/lucaslmfbib) | "
-        "LinkedIn: [lucaslmf](https://www.linkedin.com/in/lucaslmf/)"
+        "LinkedIn: [lucaslmf](https://www.linkedin.com/in/lucaslmf/) | "
+        "Instagram: [@lucaslmf_](https://www.instagram.com/lucaslmf_/)"
     )
 
     load_dotenv()
