@@ -123,6 +123,11 @@ def main() -> None:
     st.set_page_config(page_title="Bibliometria Scopus", layout="wide")
     st.title("Bibliometria Scopus")
     st.caption("Digite os termos, busque e receba análise bibliográfica automática.")
+    st.markdown(
+        "Por **Lucas Martins**  \n"
+        "GitHub: [@lucaslmfbib](https://github.com/lucaslmfbib) | "
+        "LinkedIn: [lucaslmf](https://www.linkedin.com/in/lucaslmf/)"
+    )
 
     load_dotenv()
     key_env = os.getenv("api_key") or os.getenv("SCOPUS_API_KEY") or ""
