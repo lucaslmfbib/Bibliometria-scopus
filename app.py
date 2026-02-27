@@ -136,6 +136,8 @@ def main() -> None:
     with st.sidebar:
         st.header("Parâmetros")
         api_key = st.text_input("Chave API Elsevier", type="password", value=key_env)
+        st.markdown("[Obter chave da API Scopus](https://dev.elsevier.com/)")
+        st.caption("Nao compartilhe sua chave da API. Ela e pessoal e sensivel.")
         query = st.text_area("Consulta Scopus", value=DEFAULT_QUERY, height=110)
         count = st.slider("Resultados por página", min_value=10, max_value=200, value=25, step=5)
         max_results = st.slider("Máximo para analisar", min_value=25, max_value=2000, value=200, step=25)
