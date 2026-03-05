@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 
 API_URL = "https://api.elsevier.com/content/search/scopus"
 DEFAULT_QUERY = 'TITLE-ABS-KEY ("inteligencia artificial" AND bibliotecas)'
-APP_VERSION = "2026-03-05-resumo-pesquisa"
+APP_VERSION = "2026-03-05-resumo-trabalhos"
 
 STOPWORDS = {
     "a", "as", "o", "os", "de", "da", "das", "do", "dos", "e", "em", "no", "na", "nos", "nas",
@@ -195,6 +195,53 @@ def build_search_summary(
     return "\n".join(lines)
 
 
+def build_works_summary(df: pd.DataFrame, top_n: int = 20) -> tuple[str, pd.DataFrame]:
+    required_cols = [
+        "titulo",
+        "autor",
+        "ano",
+        "periodico",
+        "tipo",
+        "citacoes",
+        "doi",
+        "url_scopus",
+    ]
+    available_cols = [col for col in required_cols if col in df.columns]
+    if not available_cols:
+        return "Nao foi possivel montar o resumo dos trabalhos com os campos disponiveis.", pd.DataFrame()
+
+    works_df = df[available_cols].copy()
+    if "citacoes" in works_df.columns:
+        works_df = works_df.sort_values(["citacoes"], ascending=False, na_position="last")
+    works_df = works_df.head(top_n).reset_index(drop=True)
+
+    lines = ["RESUMO DOS TRABALHOS (TOP POR CITACOES)"]
+    for idx, row in works_df.iterrows():
+        titulo = str(row.get("titulo", "Sem titulo")).strip() or "Sem titulo"
+        autor = str(row.get("autor", "Autor nao informado")).strip() or "Autor nao informado"
+        ano = row.get("ano", "-")
+        periodico = str(row.get("periodico", "Periodico nao informado")).strip() or "Periodico nao informado"
+        tipo = str(row.get("tipo", "Tipo nao informado")).strip() or "Tipo nao informado"
+        citacoes = int(row.get("citacoes", 0)) if pd.notna(row.get("citacoes", 0)) else 0
+        doi = str(row.get("doi", "")).strip()
+        url_scopus = str(row.get("url_scopus", "")).strip()
+
+        lines.append(f"{idx + 1}. {titulo}")
+        lines.append(
+            f"   Autor: {autor} | Ano: {ano} | Citacoes: {citacoes} | Tipo: {tipo}"
+        )
+        lines.append(f"   Periodico: {periodico}")
+        if doi and doi.lower() != "nan":
+            lines.append(f"   DOI: {doi}")
+        if url_scopus and url_scopus.lower() != "nan":
+            lines.append(f"   Link Scopus: {url_scopus}")
+        lines.append("")
+
+    display_df = works_df.copy()
+    display_df.insert(0, "rank", range(1, len(display_df) + 1))
+    return "\n".join(lines).strip(), display_df
+
+
 def main() -> None:
     st.set_page_config(page_title="Bibliometria Scopus", layout="wide")
     st.title("Bibliometria Scopus")
@@ -322,6 +369,7 @@ def main() -> None:
         tipos_df=tipos_df,
         termos_df=termos_df,
     )
+    works_summary_text, works_summary_df = build_works_summary(df, top_n=20)
 
     st.subheader("Resumo da pesquisa")
     st.code(summary_text, language="text")
@@ -333,8 +381,20 @@ def main() -> None:
         use_container_width=True,
     )
 
+    st.subheader("Resumo dos trabalhos")
+    st.code(works_summary_text, language="text")
+    st.download_button(
+        "Baixar resumo dos trabalhos (.txt)",
+        data=works_summary_text.encode("utf-8"),
+        file_name="resumo_trabalhos_scopus.txt",
+        mime="text/plain",
+        use_container_width=True,
+    )
+
     st.subheader("Tabelas da análise")
     show_rank_table("Resumo da análise", resumo_df)
+    if not works_summary_df.empty:
+        show_rank_table("Trabalhos mais citados (resumo)", works_summary_df)
     show_rank_table("Base de dados da busca", df)
 
     if not por_ano.empty:
