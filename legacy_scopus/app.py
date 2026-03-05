@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 
 API_URL = "https://api.elsevier.com/content/search/scopus"
 DEFAULT_QUERY = 'TITLE-ABS-KEY ("inteligencia artificial" AND bibliotecas)'
-APP_VERSION = "2026-03-05-resumos-so-no-final"
+APP_VERSION = "2026-03-05-resumo-coluna"
 
 STOPWORDS = {
     "a", "as", "o", "os", "de", "da", "das", "do", "dos", "e", "em", "no", "na", "nos", "nas",
@@ -135,6 +135,53 @@ def show_rank_table(title: str, data: pd.DataFrame) -> None:
     st.dataframe(data, use_container_width=True, hide_index=True)
 
 
+def _clean_value(value: Any, fallback: str) -> str:
+    if value is None:
+        return fallback
+    if isinstance(value, float) and pd.isna(value):
+        return fallback
+    text = str(value).strip()
+    if not text or text.lower() == "nan":
+        return fallback
+    return text
+
+
+def build_row_work_summary(row: pd.Series) -> str:
+    titulo = _clean_value(row.get("titulo"), "Sem titulo")
+    autor = _clean_value(row.get("autor"), "Autor nao informado")
+    periodico = _clean_value(row.get("periodico"), "Periodico nao informado")
+    tipo = _clean_value(row.get("tipo"), "Tipo nao informado")
+
+    ano = row.get("ano")
+    if ano is None or (isinstance(ano, float) and pd.isna(ano)):
+        ano_text = "-"
+    else:
+        try:
+            ano_text = str(int(ano))
+        except (TypeError, ValueError):
+            ano_text = _clean_value(ano, "-")
+
+    citacoes_raw = row.get("citacoes", 0)
+    if citacoes_raw is None or (isinstance(citacoes_raw, float) and pd.isna(citacoes_raw)):
+        citacoes = 0
+    else:
+        try:
+            citacoes = int(citacoes_raw)
+        except (TypeError, ValueError):
+            citacoes = 0
+
+    return (
+        f"{titulo}. Autor principal: {autor}. Ano: {ano_text}. "
+        f"Periodico: {periodico}. Tipo: {tipo}. Citacoes: {citacoes}."
+    )
+
+
+def add_works_summary_column(df: pd.DataFrame) -> pd.DataFrame:
+    df_display = df.copy()
+    df_display["resumo_trabalho"] = df_display.apply(build_row_work_summary, axis=1)
+    return df_display
+
+
 def build_search_summary(
     query: str,
     docs: int,
@@ -198,6 +245,7 @@ def build_search_summary(
 def build_works_summary(df: pd.DataFrame, top_n: int = 20) -> tuple[str, pd.DataFrame]:
     required_cols = [
         "titulo",
+        "resumo_trabalho",
         "autor",
         "ano",
         "periodico",
@@ -218,6 +266,7 @@ def build_works_summary(df: pd.DataFrame, top_n: int = 20) -> tuple[str, pd.Data
     lines = ["RESUMO DOS TRABALHOS (TOP POR CITACOES)"]
     for idx, row in works_df.iterrows():
         titulo = str(row.get("titulo", "Sem titulo")).strip() or "Sem titulo"
+        resumo = str(row.get("resumo_trabalho", "")).strip()
         autor = str(row.get("autor", "Autor nao informado")).strip() or "Autor nao informado"
         ano = row.get("ano", "-")
         periodico = str(row.get("periodico", "Periodico nao informado")).strip() or "Periodico nao informado"
@@ -231,6 +280,8 @@ def build_works_summary(df: pd.DataFrame, top_n: int = 20) -> tuple[str, pd.Data
             f"   Autor: {autor} | Ano: {ano} | Citacoes: {citacoes} | Tipo: {tipo}"
         )
         lines.append(f"   Periodico: {periodico}")
+        if resumo and resumo.lower() != "nan":
+            lines.append(f"   Resumo: {resumo}")
         if doi and doi.lower() != "nan":
             lines.append(f"   DOI: {doi}")
         if url_scopus and url_scopus.lower() != "nan":
@@ -282,6 +333,7 @@ def main() -> None:
         with st.spinner("Consultando API do Scopus..."):
             result = search_scopus(api_key.strip(), query.strip(), count, max_results)
         df = normalize_df(result.entries)
+        df_display = add_works_summary_column(df)
     except requests.HTTPError as exc:
         status = exc.response.status_code if exc.response else "?"
         st.error(f"Erro HTTP na API Scopus: {status}")
@@ -369,10 +421,10 @@ def main() -> None:
         tipos_df=tipos_df,
         termos_df=termos_df,
     )
-    works_summary_text, works_summary_df = build_works_summary(df, top_n=20)
+    works_summary_text, works_summary_df = build_works_summary(df_display, top_n=20)
 
     st.subheader("Tabelas da análise")
-    show_rank_table("Base de dados da busca", df)
+    show_rank_table("Base de dados da busca", df_display)
 
     if not por_ano.empty:
         show_rank_table("Publicações por ano", por_ano)
@@ -414,14 +466,14 @@ def main() -> None:
 
     st.download_button(
         "Baixar CSV",
-        data=df.to_csv(index=False).encode("utf-8"),
+        data=df_display.to_csv(index=False).encode("utf-8"),
         file_name="bibliometria_scopus.csv",
         mime="text/csv",
         use_container_width=True,
     )
     st.download_button(
         "Baixar Excel",
-        data=to_excel_bytes(df),
+        data=to_excel_bytes(df_display),
         file_name="bibliometria_scopus.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=True,
