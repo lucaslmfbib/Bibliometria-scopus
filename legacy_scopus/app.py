@@ -16,8 +16,9 @@ import streamlit as st
 from dotenv import load_dotenv
 
 API_URL = "https://api.elsevier.com/content/search/scopus"
+ABSTRACT_API_URL = "https://api.elsevier.com/content/abstract/eid/{eid}"
 DEFAULT_QUERY = 'TITLE-ABS-KEY ("inteligencia artificial" AND bibliotecas)'
-APP_VERSION = "2026-03-05-resumo-coluna"
+APP_VERSION = "2026-03-05-resumo-api-scopus"
 
 STOPWORDS = {
     "a", "as", "o", "os", "de", "da", "das", "do", "dos", "e", "em", "no", "na", "nos", "nas",
@@ -74,6 +75,7 @@ def normalize_df(entries: list[dict[str, Any]]) -> pd.DataFrame:
 
     raw = pd.json_normalize(entries)
     cols = [
+        "eid",
         "dc:title",
         "dc:creator",
         "prism:coverDate",
@@ -135,50 +137,128 @@ def show_rank_table(title: str, data: pd.DataFrame) -> None:
     st.dataframe(data, use_container_width=True, hide_index=True)
 
 
-def _clean_value(value: Any, fallback: str) -> str:
-    if value is None:
-        return fallback
-    if isinstance(value, float) and pd.isna(value):
-        return fallback
-    text = str(value).strip()
-    if not text or text.lower() == "nan":
-        return fallback
-    return text
+def _normalize_space(text: str) -> str:
+    return re.sub(r"\s+", " ", text).strip()
 
 
-def build_row_work_summary(row: pd.Series) -> str:
-    titulo = _clean_value(row.get("titulo"), "Sem titulo")
-    autor = _clean_value(row.get("autor"), "Autor nao informado")
-    periodico = _clean_value(row.get("periodico"), "Periodico nao informado")
-    tipo = _clean_value(row.get("tipo"), "Tipo nao informado")
+def _extract_text(node: Any) -> str:
+    if isinstance(node, str):
+        return _normalize_space(node)
+    if isinstance(node, dict):
+        for key in ("$", "_", "#text", "text"):
+            if key in node:
+                text = _extract_text(node[key])
+                if text:
+                    return text
+        return ""
+    if isinstance(node, list):
+        parts = [_extract_text(item) for item in node]
+        joined = " ".join(part for part in parts if part)
+        return _normalize_space(joined)
+    return ""
 
-    ano = row.get("ano")
-    if ano is None or (isinstance(ano, float) and pd.isna(ano)):
-        ano_text = "-"
-    else:
-        try:
-            ano_text = str(int(ano))
-        except (TypeError, ValueError):
-            ano_text = _clean_value(ano, "-")
 
-    citacoes_raw = row.get("citacoes", 0)
-    if citacoes_raw is None or (isinstance(citacoes_raw, float) and pd.isna(citacoes_raw)):
-        citacoes = 0
-    else:
-        try:
-            citacoes = int(citacoes_raw)
-        except (TypeError, ValueError):
-            citacoes = 0
+def _collect_key_values(node: Any, target_key: str, acc: list[Any]) -> None:
+    if isinstance(node, dict):
+        for key, value in node.items():
+            if key == target_key:
+                acc.append(value)
+            _collect_key_values(value, target_key, acc)
+    elif isinstance(node, list):
+        for item in node:
+            _collect_key_values(item, target_key, acc)
 
-    return (
-        f"{titulo}. Autor principal: {autor}. Ano: {ano_text}. "
-        f"Periodico: {periodico}. Tipo: {tipo}. Citacoes: {citacoes}."
+
+def parse_scopus_abstract(payload: dict[str, Any]) -> str:
+    response = payload.get("abstracts-retrieval-response", {})
+    coredata = response.get("coredata", {})
+
+    direct = _extract_text(coredata.get("dc:description"))
+    if direct:
+        return direct
+
+    paras: list[Any] = []
+    _collect_key_values(response, "ce:para", paras)
+    para_text = _normalize_space(" ".join(_extract_text(item) for item in paras if _extract_text(item)))
+    if para_text:
+        return para_text
+
+    descriptions: list[Any] = []
+    _collect_key_values(response, "dc:description", descriptions)
+    desc_text = _normalize_space(
+        " ".join(_extract_text(item) for item in descriptions if _extract_text(item))
     )
+    return desc_text
 
 
-def add_works_summary_column(df: pd.DataFrame) -> pd.DataFrame:
+@st.cache_data(show_spinner=False)
+def fetch_article_abstract(api_key: str, eid: str) -> tuple[str, int]:
+    if not eid:
+        return "", 0
+    response = requests.get(
+        ABSTRACT_API_URL.format(eid=eid),
+        headers=api_headers(api_key),
+        params={"view": "FULL"},
+        timeout=40,
+    )
+    status = response.status_code
+    if status >= 400:
+        return "", status
+    try:
+        payload = response.json()
+    except ValueError:
+        return "", status
+    return parse_scopus_abstract(payload), status
+
+
+def add_article_abstract_column(api_key: str, df: pd.DataFrame, max_abstracts: int) -> pd.DataFrame:
     df_display = df.copy()
-    df_display["resumo_trabalho"] = df_display.apply(build_row_work_summary, axis=1)
+    df_display["resumo_artigo_scopus"] = "Resumo nao consultado."
+    if "eid" not in df_display.columns:
+        df_display["resumo_artigo_scopus"] = "EID nao encontrado no resultado da busca."
+        return df_display
+
+    eids = df_display["eid"].fillna("").astype(str).str.strip()
+    fetchable_indexes = [idx for idx, eid in eids.items() if eid]
+    missing_indexes = [idx for idx, eid in eids.items() if not eid]
+    for idx in missing_indexes:
+        df_display.at[idx, "resumo_artigo_scopus"] = "EID ausente para consulta do resumo."
+
+    if max_abstracts < len(fetchable_indexes):
+        for idx in fetchable_indexes[max_abstracts:]:
+            df_display.at[idx, "resumo_artigo_scopus"] = "Resumo nao consultado (fora do limite definido)."
+
+    stop_message = ""
+    for idx in fetchable_indexes[:max_abstracts]:
+        if stop_message:
+            df_display.at[idx, "resumo_artigo_scopus"] = stop_message
+            continue
+
+        eid = eids.loc[idx]
+        abstract, status = fetch_article_abstract(api_key, eid)
+
+        if status in {401, 403}:
+            stop_message = "Sem permissao para consultar abstracts com esta chave da API."
+            df_display.at[idx, "resumo_artigo_scopus"] = stop_message
+            continue
+        if status == 429:
+            stop_message = "Limite de requisicoes da API atingido durante a consulta dos resumos."
+            df_display.at[idx, "resumo_artigo_scopus"] = stop_message
+            continue
+        if status >= 500:
+            df_display.at[idx, "resumo_artigo_scopus"] = "Erro temporario da API ao consultar este resumo."
+            continue
+        if status >= 400:
+            df_display.at[idx, "resumo_artigo_scopus"] = "Resumo nao disponivel na API para este trabalho."
+            continue
+
+        df_display.at[idx, "resumo_artigo_scopus"] = (
+            abstract if abstract else "Resumo nao disponivel na API para este trabalho."
+        )
+
+    if stop_message:
+        for idx in fetchable_indexes[max_abstracts:]:
+            df_display.at[idx, "resumo_artigo_scopus"] = stop_message
     return df_display
 
 
@@ -245,7 +325,7 @@ def build_search_summary(
 def build_works_summary(df: pd.DataFrame, top_n: int = 20) -> tuple[str, pd.DataFrame]:
     required_cols = [
         "titulo",
-        "resumo_trabalho",
+        "resumo_artigo_scopus",
         "autor",
         "ano",
         "periodico",
@@ -266,7 +346,7 @@ def build_works_summary(df: pd.DataFrame, top_n: int = 20) -> tuple[str, pd.Data
     lines = ["RESUMO DOS TRABALHOS (TOP POR CITACOES)"]
     for idx, row in works_df.iterrows():
         titulo = str(row.get("titulo", "Sem titulo")).strip() or "Sem titulo"
-        resumo = str(row.get("resumo_trabalho", "")).strip()
+        resumo = str(row.get("resumo_artigo_scopus", "")).strip()
         autor = str(row.get("autor", "Autor nao informado")).strip() or "Autor nao informado"
         ano = row.get("ano", "-")
         periodico = str(row.get("periodico", "Periodico nao informado")).strip() or "Periodico nao informado"
@@ -316,6 +396,18 @@ def main() -> None:
         query = st.text_area("Consulta Scopus", value=DEFAULT_QUERY, height=110)
         count = st.slider("Resultados por página", min_value=10, max_value=200, value=25, step=5)
         max_results = st.slider("Máximo para analisar", min_value=25, max_value=2000, value=200, step=25)
+        include_article_abstracts = st.checkbox(
+            "Buscar resumo real dos artigos na API",
+            value=True,
+        )
+        abstract_limit = st.slider(
+            "Máximo de resumos de artigos para consultar",
+            min_value=10,
+            max_value=2000,
+            value=150,
+            step=10,
+            disabled=not include_article_abstracts,
+        )
         run = st.button("Buscar e analisar", type="primary", use_container_width=True)
 
     if not run:
@@ -333,7 +425,13 @@ def main() -> None:
         with st.spinner("Consultando API do Scopus..."):
             result = search_scopus(api_key.strip(), query.strip(), count, max_results)
         df = normalize_df(result.entries)
-        df_display = add_works_summary_column(df)
+        if include_article_abstracts:
+            limit = min(abstract_limit, len(df))
+            with st.spinner("Consultando resumos dos artigos na API da Scopus..."):
+                df_display = add_article_abstract_column(api_key.strip(), df, limit)
+        else:
+            df_display = df.copy()
+            df_display["resumo_artigo_scopus"] = "Consulta de resumo desativada."
     except requests.HTTPError as exc:
         status = exc.response.status_code if exc.response else "?"
         st.error(f"Erro HTTP na API Scopus: {status}")
@@ -350,6 +448,15 @@ def main() -> None:
         return
 
     st.success(f"Documentos coletados: {len(df)} (total no Scopus: {result.total_results})")
+    if include_article_abstracts:
+        consultados = min(abstract_limit, len(df))
+        obtidos = (
+            df_display["resumo_artigo_scopus"]
+            .astype(str)
+            .str.contains("na API para este trabalho|nao consultado|EID|Erro temporario|Sem permissao|Limite de requisicoes", case=False, regex=True)
+            .pipe(lambda series: int((~series).sum()))
+        )
+        st.caption(f"Resumos de artigos consultados: {consultados}. Resumos obtidos: {obtidos}.")
 
     docs = len(df)
     total_cit = int(df["citacoes"].sum()) if "citacoes" in df.columns else 0
