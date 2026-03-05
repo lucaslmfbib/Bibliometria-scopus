@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 
 API_URL = "https://api.elsevier.com/content/search/scopus"
 DEFAULT_QUERY = 'TITLE-ABS-KEY ("inteligencia artificial" AND bibliotecas)'
-APP_VERSION = "2026-03-05-layout-tabelas"
+APP_VERSION = "2026-03-05-resumo-pesquisa"
 
 STOPWORDS = {
     "a", "as", "o", "os", "de", "da", "das", "do", "dos", "e", "em", "no", "na", "nos", "nas",
@@ -135,6 +135,66 @@ def show_rank_table(title: str, data: pd.DataFrame) -> None:
     st.dataframe(data, use_container_width=True, hide_index=True)
 
 
+def build_search_summary(
+    query: str,
+    docs: int,
+    total_scopus: int,
+    total_cit: int,
+    media_cit: float,
+    ano_ini: int | str,
+    ano_fim: int | str,
+    por_ano: pd.DataFrame,
+    dist_citacoes: pd.DataFrame,
+    autores_df: pd.DataFrame,
+    periodicos_df: pd.DataFrame,
+    tipos_df: pd.DataFrame,
+    termos_df: pd.DataFrame,
+) -> str:
+    lines = [
+        "RESUMO DA PESQUISA",
+        f"- Consulta: {query}",
+        f"- Amostra analisada: {docs} documentos (total no Scopus: {total_scopus})",
+        f"- Periodo da amostra: {ano_ini} - {ano_fim}",
+        f"- Citacoes totais: {total_cit}",
+        f"- Media de citacoes por documento: {media_cit:.2f}",
+    ]
+
+    if not por_ano.empty:
+        top_ano = por_ano.sort_values("publicacoes", ascending=False).iloc[0]
+        lines.append(
+            f"- Ano com mais publicacoes: {int(top_ano['ano'])} ({int(top_ano['publicacoes'])} documentos)"
+        )
+    if not dist_citacoes.empty:
+        top_faixa = dist_citacoes.sort_values("documentos", ascending=False).iloc[0]
+        lines.append(
+            f"- Faixa de citacoes mais comum: {top_faixa['faixa_citacoes']} "
+            f"({int(top_faixa['documentos'])} documentos)"
+        )
+    if not autores_df.empty:
+        top_autor = autores_df.iloc[0]
+        lines.append(
+            f"- Autor mais frequente: {top_autor['autor']} "
+            f"({int(top_autor['publicacoes'])} documentos)"
+        )
+    if not periodicos_df.empty:
+        top_periodico = periodicos_df.iloc[0]
+        lines.append(
+            f"- Periodico com mais publicacoes: {top_periodico['periodico']} "
+            f"({int(top_periodico['publicacoes'])} documentos)"
+        )
+    if not tipos_df.empty:
+        top_tipo = tipos_df.iloc[0]
+        lines.append(
+            f"- Tipo de documento predominante: {top_tipo['tipo']} "
+            f"({int(top_tipo['publicacoes'])} documentos)"
+        )
+    if not termos_df.empty:
+        termos_top3 = ", ".join(termos_df.head(3)["termo"].astype(str).tolist())
+        lines.append(f"- Termos de maior destaque nos titulos: {termos_top3}")
+
+    return "\n".join(lines)
+
+
 def main() -> None:
     st.set_page_config(page_title="Bibliometria Scopus", layout="wide")
     st.title("Bibliometria Scopus")
@@ -246,6 +306,32 @@ def main() -> None:
         termos = top_terms(df["titulo"], top_n=20)
         if not termos.empty:
             termos_df = termos
+
+    summary_text = build_search_summary(
+        query=query.strip(),
+        docs=docs,
+        total_scopus=result.total_results,
+        total_cit=total_cit,
+        media_cit=media_cit,
+        ano_ini=ano_ini,
+        ano_fim=ano_fim,
+        por_ano=por_ano,
+        dist_citacoes=dist_citacoes,
+        autores_df=autores_df,
+        periodicos_df=periodicos_df,
+        tipos_df=tipos_df,
+        termos_df=termos_df,
+    )
+
+    st.subheader("Resumo da pesquisa")
+    st.code(summary_text, language="text")
+    st.download_button(
+        "Baixar resumo (.txt)",
+        data=summary_text.encode("utf-8"),
+        file_name="resumo_pesquisa_scopus.txt",
+        mime="text/plain",
+        use_container_width=True,
+    )
 
     st.subheader("Tabelas da análise")
     show_rank_table("Resumo da análise", resumo_df)
