@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 
 API_URL = "https://api.elsevier.com/content/search/scopus"
 DEFAULT_QUERY = 'TITLE-ABS-KEY ("inteligencia artificial" AND bibliotecas)'
-APP_VERSION = "2026-03-05-resumo-pesquisa-final"
+APP_VERSION = "2026-03-05-resumos-final"
 
 STOPWORDS = {
     "a", "as", "o", "os", "de", "da", "das", "do", "dos", "e", "em", "no", "na", "nos", "nas",
@@ -371,16 +371,6 @@ def main() -> None:
     )
     works_summary_text, works_summary_df = build_works_summary(df, top_n=20)
 
-    st.subheader("Resumo dos trabalhos")
-    st.code(works_summary_text, language="text")
-    st.download_button(
-        "Baixar resumo dos trabalhos (.txt)",
-        data=works_summary_text.encode("utf-8"),
-        file_name="resumo_trabalhos_scopus.txt",
-        mime="text/plain",
-        use_container_width=True,
-    )
-
     st.subheader("Tabelas da análise")
     show_rank_table("Resumo da análise", resumo_df)
     if not works_summary_df.empty:
@@ -446,6 +436,16 @@ def main() -> None:
         "Baixar resumo (.txt)",
         data=summary_text.encode("utf-8"),
         file_name="resumo_pesquisa_scopus.txt",
+        mime="text/plain",
+        use_container_width=True,
+    )
+
+    st.subheader("Resumo dos trabalhos")
+    st.code(works_summary_text, language="text")
+    st.download_button(
+        "Baixar resumo dos trabalhos (.txt)",
+        data=works_summary_text.encode("utf-8"),
+        file_name="resumo_trabalhos_scopus.txt",
         mime="text/plain",
         use_container_width=True,
     )
