@@ -1,6 +1,19 @@
-# Bibliometria Scopus
+# Bibliometria Scopus (do zero)
 
 Aplicativo Streamlit para busca de artigos no Scopus e analise bibliometrica automatica.
+
+## O que o app faz
+
+- Busca artigos pela API da Elsevier/Scopus
+- Pagina resultados automaticamente
+- Mostra metricas bibliometricas:
+  - total de documentos
+  - citacoes totais e media
+  - publicacoes por ano
+  - top autores
+  - top periodicos
+  - termos mais frequentes nos titulos
+- Permite download em CSV e Excel
 
 ## 1) Criar ambiente e instalar dependencias
 
@@ -25,6 +38,12 @@ api_key="SUA_CHAVE_ELSEVIER"
 ```bash
 python -m streamlit run legacy_scopus/app.py
 ```
+
+## 4) Deploy no Streamlit Cloud
+
+- Repositorio: este projeto
+- Branch: a branch com estas alteracoes
+- Main file path: `legacy_scopus/app.py`
 
 ## Consulta exemplo
 

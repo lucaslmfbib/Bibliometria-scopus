@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 
 API_URL = "https://api.elsevier.com/content/search/scopus"
 DEFAULT_QUERY = 'TITLE-ABS-KEY ("inteligencia artificial" AND bibliotecas)'
+APP_VERSION = "2026-03-05-graficos"
 
 STOPWORDS = {
     "a", "as", "o", "os", "de", "da", "das", "do", "dos", "e", "em", "no", "na", "nos", "nas",
@@ -119,9 +120,21 @@ def to_excel_bytes(df: pd.DataFrame) -> bytes:
     return buffer.getvalue()
 
 
+def show_rank_chart(
+    title: str,
+    data: pd.DataFrame,
+    index_col: str,
+    value_col: str,
+) -> None:
+    st.subheader(title)
+    st.bar_chart(data.set_index(index_col)[value_col], use_container_width=True)
+    st.dataframe(data, use_container_width=True, hide_index=True)
+
+
 def main() -> None:
     st.set_page_config(page_title="Bibliometria Scopus", layout="wide")
     st.title("Bibliometria Scopus")
+    st.caption(f"Versao do app: {APP_VERSION}")
     st.caption("Digite os termos, busque e receba análise bibliográfica automática.")
     st.markdown(
         "Por **Lucas Martins**  \n"
@@ -190,28 +203,53 @@ def main() -> None:
     if "ano" in df.columns:
         por_ano = df.dropna(subset=["ano"]).groupby("ano").size().reset_index(name="publicacoes")
         if not por_ano.empty:
+            por_ano = por_ano.sort_values("ano")
             st.subheader("Publicações por ano")
-            st.dataframe(por_ano.sort_values("ano"), use_container_width=True, hide_index=True)
+            st.bar_chart(por_ano.set_index("ano")["publicacoes"], use_container_width=True)
+            st.dataframe(por_ano, use_container_width=True, hide_index=True)
+
+    if "citacoes" in df.columns and not df["citacoes"].empty:
+        bins = [0, 1, 5, 10, 25, 50, 100, float("inf")]
+        labels = ["0", "1-4", "5-9", "10-24", "25-49", "50-99", "100+"]
+        citacoes = df["citacoes"].clip(lower=0)
+        faixas = pd.cut(citacoes, bins=bins, labels=labels, right=False, include_lowest=True)
+        dist_citacoes = faixas.value_counts(sort=False).reset_index()
+        dist_citacoes.columns = ["faixa_citacoes", "documentos"]
+        if not dist_citacoes.empty:
+            show_rank_chart(
+                "Distribuição de citações",
+                dist_citacoes,
+                "faixa_citacoes",
+                "documentos",
+            )
 
     if "autor" in df.columns:
         top_autores = df["autor"].dropna().astype(str).value_counts().head(15)
         if not top_autores.empty:
-            st.subheader("Top autores")
             autores_df = top_autores.rename_axis("autor").reset_index(name="publicacoes")
-            st.dataframe(autores_df, use_container_width=True, hide_index=True)
+            show_rank_chart("Top autores", autores_df, "autor", "publicacoes")
 
     if "periodico" in df.columns:
         top_periodicos = df["periodico"].dropna().astype(str).value_counts().head(15)
         if not top_periodicos.empty:
-            st.subheader("Top periódicos")
             periodicos_df = top_periodicos.rename_axis("periodico").reset_index(name="publicacoes")
-            st.dataframe(periodicos_df, use_container_width=True, hide_index=True)
+            show_rank_chart("Top periódicos", periodicos_df, "periodico", "publicacoes")
+
+    if "tipo" in df.columns:
+        top_tipos = df["tipo"].dropna().astype(str).value_counts().head(10)
+        if not top_tipos.empty:
+            tipos_df = top_tipos.rename_axis("tipo").reset_index(name="publicacoes")
+            show_rank_chart("Tipos de documento", tipos_df, "tipo", "publicacoes")
 
     if "titulo" in df.columns:
         termos = top_terms(df["titulo"], top_n=20)
         if not termos.empty:
-            st.subheader("Termos mais frequentes nos títulos")
-            st.dataframe(termos, use_container_width=True, hide_index=True)
+            show_rank_chart(
+                "Termos mais frequentes nos títulos",
+                termos,
+                "termo",
+                "frequencia",
+            )
 
     st.subheader("Base de dados da busca")
     st.dataframe(df, use_container_width=True)
