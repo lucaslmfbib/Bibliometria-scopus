@@ -200,6 +200,11 @@ def main() -> None:
     c3.metric("Média citações", f"{media_cit:.2f}")
     c4.metric("Período", f"{ano_ini} - {ano_fim}")
 
+    st.subheader("Base de dados da busca")
+    st.dataframe(df, use_container_width=True)
+
+    st.subheader("Gráficos e rankings")
+
     if "ano" in df.columns:
         por_ano = df.dropna(subset=["ano"]).groupby("ano").size().reset_index(name="publicacoes")
         if not por_ano.empty:
@@ -250,9 +255,6 @@ def main() -> None:
                 "termo",
                 "frequencia",
             )
-
-    st.subheader("Base de dados da busca")
-    st.dataframe(df, use_container_width=True)
 
     st.download_button(
         "Baixar CSV",
