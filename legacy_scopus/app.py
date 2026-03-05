@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 
 API_URL = "https://api.elsevier.com/content/search/scopus"
 DEFAULT_QUERY = 'TITLE-ABS-KEY ("inteligencia artificial" AND bibliotecas)'
-APP_VERSION = "2026-03-05-resumos-final"
+APP_VERSION = "2026-03-05-resumos-so-no-final"
 
 STOPWORDS = {
     "a", "as", "o", "os", "de", "da", "das", "do", "dos", "e", "em", "no", "na", "nos", "nas",
@@ -372,9 +372,6 @@ def main() -> None:
     works_summary_text, works_summary_df = build_works_summary(df, top_n=20)
 
     st.subheader("Tabelas da análise")
-    show_rank_table("Resumo da análise", resumo_df)
-    if not works_summary_df.empty:
-        show_rank_table("Trabalhos mais citados (resumo)", works_summary_df)
     show_rank_table("Base de dados da busca", df)
 
     if not por_ano.empty:
@@ -449,6 +446,11 @@ def main() -> None:
         mime="text/plain",
         use_container_width=True,
     )
+
+    st.subheader("Tabelas de resumo")
+    show_rank_table("Resumo da análise", resumo_df)
+    if not works_summary_df.empty:
+        show_rank_table("Trabalhos mais citados (resumo)", works_summary_df)
 
 
 if __name__ == "__main__":
