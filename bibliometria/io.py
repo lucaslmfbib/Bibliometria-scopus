@@ -1,145 +1,73 @@
-import unicodedata
-from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
 
 
-def _normalize_header(name: str) -> str:
-    text = unicodedata.normalize("NFKD", str(name))
-    text = "".join(ch for ch in text if not unicodedata.combining(ch))
-    return " ".join(text.strip().lower().replace("_", " ").split())
+def load_bibliography(path: str, encoding: Optional[str] = None):
+    """Carrega um arquivo CSV ou Excel contendo registros bibliográficos.
 
+    Estratégia:
+    - Detecta extensão (.csv, .xls, .xlsx)
+    - Usa pandas para leitura
+    - Normaliza nomes de colunas comuns para: Authors, Title, Year, Source title (journal), Author Keywords, Cited by
 
-def load_bibliography(
-    path: Union[str, Path],
-    encoding: Optional[str] = None,
-    sheet_name: Union[str, int] = 0,
-):
-    """Carrega um arquivo CSV/Excel contendo registros bibliográficos.
-
-    Colunas conhecidas são normalizadas para:
-    - Authors
-    - Title
-    - Year
-    - Journal
-    - Keywords
-    - Cited by
-    - Abstract
-    - DOI
-
-    Demais colunas do arquivo original são preservadas.
+    Retorna um pandas.DataFrame com colunas normalizadas (em caso de ausência, coluna não é criada).
     """
+    # Import dentro da função para manter importação leve do pacote
+    import os
     import pandas as pd
 
-    file_path = Path(path)
-    if not file_path.exists():
-        raise FileNotFoundError(f"Arquivo não encontrado: {file_path}")
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Arquivo não encontrado: {path}")
 
-    ext = file_path.suffix.lower()
+    ext = os.path.splitext(path)[1].lower()
     if ext == ".csv":
-        # sep=None habilita autodetecção de delimitador (vírgula, ponto e vírgula etc.)
-        df = pd.read_csv(file_path, encoding=encoding, sep=None, engine="python")
+        df = pd.read_csv(path, encoding=encoding)
     elif ext in (".xls", ".xlsx"):
-        df = pd.read_excel(file_path, sheet_name=sheet_name)
+        df = pd.read_excel(path)
     else:
-        # fallback por autodetecção
+        # Tentar com pandas autodetect
         try:
-            df = pd.read_csv(file_path, encoding=encoding, sep=None, engine="python")
+            df = pd.read_csv(path, encoding=encoding)
         except Exception:
-            df = pd.read_excel(file_path, sheet_name=sheet_name)
+            df = pd.read_excel(path)
 
-    df = df.rename(columns={c: str(c).strip() for c in df.columns})
-    normalized_columns = {_normalize_header(c): c for c in df.columns}
+    # normalizar colunas (lowercase and stripped)
+    orig_cols = {c: c.strip() for c in df.columns}
+    df.rename(columns=orig_cols, inplace=True)
+    cols = {c.lower(): c for c in df.columns}
 
-    def try_get(names):
-        for name in names:
-            original = normalized_columns.get(_normalize_header(name))
-            if original is not None:
-                return df[original]
+    def try_get(df, names):
+        for n in names:
+            if n in cols:
+                return df[cols[n]]
         return None
 
-    mapped = {
-        "Authors": try_get(
-            [
-                "authors",
-                "author",
-                "author(s)",
-                "au",
-                "autores",
-            ]
-        ),
-        "Title": try_get(
-            [
-                "title",
-                "document title",
-                "article title",
-                "titulo",
-            ]
-        ),
-        "Year": try_get(
-            [
-                "year",
-                "py",
-                "publication year",
-                "ano",
-            ]
-        ),
-        "Journal": try_get(
-            [
-                "source title",
-                "journal",
-                "journal title",
-                "source",
-                "periodico",
-                "revista",
-            ]
-        ),
-        "Keywords": try_get(
-            [
-                "author keywords",
-                "keywords",
-                "index keywords",
-                "palavras-chave",
-                "palavras chave",
-            ]
-        ),
-        "Cited by": try_get(
-            [
-                "cited by",
-                "times cited",
-                "cited_by",
-                "citado por",
-            ]
-        ),
-        "Abstract": try_get(
-            [
-                "abstract",
-                "summary",
-                "resumo",
-                "description",
-                "ab",
-            ]
-        ),
-        "DOI": try_get(
-            [
-                "doi",
-                "document object identifier",
-                "article doi",
-                "id doi",
-            ]
-        ),
-    }
+    # Mapear colunas comuns
+    mapped = {}
+    mapped['Authors'] = try_get(df, [
+        'authors', 'author', 'author(s)', 'au', 'author(s) ', 'authors '
+    ])
+    mapped['Title'] = try_get(df, ['title', 'document title', 'article title'])
+    mapped['Year'] = try_get(df, ['year', 'py', 'publication year'])
+    mapped['Journal'] = try_get(df, ['source title', 'journal', 'journal title', 'source'])
+    mapped['Keywords'] = try_get(df, ['author keywords', 'keywords', 'author keywords '])
+    mapped['Cited by'] = try_get(df, ['cited by', 'times cited', 'cited_by'])
 
     out = pd.DataFrame()
-    for canonical, series in mapped.items():
-        if series is not None:
-            out[canonical] = series
+    for k, v in mapped.items():
+        if v is not None:
+            out[k] = v
 
-    canonical_set = set(out.columns)
-    for col in df.columns:
-        if col not in canonical_set:
-            out[col] = df[col]
+    # preserve other columns too
+    other_cols = [c for c in df.columns if c not in out.columns]
+    for c in other_cols:
+        out[c] = df[c]
 
-    if "Year" in out.columns:
-        out["Year"] = pd.to_numeric(out["Year"], errors="coerce").astype("Int64")
+    # pequenas normalizações
+    if 'Year' in out.columns:
+        # tentar converter para int quando possível
+        try:
+            out['Year'] = pd.to_numeric(out['Year'], errors='coerce').astype('Int64')
+        except Exception:
+            pass
 
     return out
