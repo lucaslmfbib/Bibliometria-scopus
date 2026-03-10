@@ -31,3 +31,26 @@ python -m streamlit run legacy_scopus/app.py
 ```text
 TITLE-ABS-KEY ("inteligencia artificial" AND bibliotecas)
 ```
+
+## Análises bibliométricas (novo pacote)
+
+Criei um pacote auxiliar `bibliometria/` com funções para carregar dados (CSV/Excel), calcular métricas básicas e gerar visualizações. Arquivos adicionados nesta branch:
+
+- `bibliometria/__init__.py` — exporta as funções principais
+- `bibliometria/io.py` — carregador de CSV/Excel e normalização mínima de colunas
+- `bibliometria/analysis.py` — funções de análise (top authors, journals, years, keywords, citações)
+- `bibliometria/viz.py` — funções simples de visualização (matplotlib)
+- `examples/demo.py` — script exemplo de linha de comando
+- `requirements_app.txt` — dependências recomendadas para rodar o app
+
+Uso rápido:
+
+```bash
+python -m pip install -r requirements_app.txt
+python examples/demo.py path/para/seu_arquivo.csv
+```
+
+Observações:
+- O carregador tenta mapear colunas comuns (Authors, Title, Year, Source title, Author Keywords, Cited by).
+- As dependências do projeto principal permanecem — este arquivo `requirements_app.txt` é específico para a parte de análise/visualização.
+
