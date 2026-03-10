@@ -1,6 +1,0 @@
-# Dependências para o app de análises bibliométricas
-pandas
-matplotlib
-plotly
-networkx
-openpyxl  # para ler arquivos Excel
