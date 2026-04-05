@@ -128,8 +128,10 @@ def main():
     if social_links:
         links_line = " | ".join(f"[{label}]({url})" for label, url in social_links.items())
         st.markdown(links_line)
+        st.caption("Criado pelo Bibliotecário e Advogado Lucas Martins")
+    else:
+        st.caption("Criado pelo Bibliotecário e Advogado Lucas Martins")
     st.title("Analise Bibliometrica com CSV, Excel ou BibTeX")
-    st.caption("Elaborado pelo Bibliotecario Lucas Martins")
     st.caption("Envie um arquivo (.csv, .xlsx ou .bib) e gere tabelas, graficos e grafo de coautoria.")
 
     with st.sidebar:
