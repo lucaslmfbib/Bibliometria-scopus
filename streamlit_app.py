@@ -125,12 +125,10 @@ def _run_analysis(
 def main():
     st.set_page_config(page_title="Bibliometria", layout="wide")
     social_links = _get_social_links()
+    st.caption("Criado pelo Bibliotecário e Advogado Lucas Martins")
     if social_links:
         links_line = " | ".join(f"[{label}]({url})" for label, url in social_links.items())
         st.markdown(links_line)
-        st.caption("Criado pelo Bibliotecário e Advogado Lucas Martins")
-    else:
-        st.caption("Criado pelo Bibliotecário e Advogado Lucas Martins")
     st.title("Analise Bibliometrica com CSV, Excel ou BibTeX")
     st.caption("Envie um arquivo (.csv, .xlsx ou .bib) e gere tabelas, graficos e grafo de coautoria.")
 
