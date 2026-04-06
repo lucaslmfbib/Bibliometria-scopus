@@ -21,6 +21,7 @@ from .analysis import (
     title_term_frequency,
     top_authors,
     top_journals,
+    word_cloud_term_frequency,
     yearly_growth_rates,
     yearly_counts,
 )
@@ -33,6 +34,7 @@ from .viz import (
     plot_pie_top,
     plot_time_series,
     plot_vertical_bar,
+    plot_word_cloud,
 )
 
 
@@ -78,6 +80,7 @@ def run_bibliometric_analysis(
     keywords = keyword_frequency(df, n=top_n)
     title_terms = title_term_frequency(df, n=max(top_n, 20))
     abstract_terms = abstract_term_frequency(df, n=max(top_n, 20))
+    word_cloud_terms = word_cloud_term_frequency(df, n=max(top_n * 5, 100))
     citations = citation_stats(df)
     cited_docs = most_cited_documents(df, n=max(top_n * 10, 100))
     overview = research_overview(df)
@@ -106,6 +109,7 @@ def run_bibliometric_analysis(
         "top_keywords": _pairs_to_records(keywords, "keyword"),
         "top_title_terms": _pairs_to_records(title_terms, "term"),
         "top_abstract_terms": _pairs_to_records(abstract_terms, "term"),
+        "word_cloud_terms": _pairs_to_records(word_cloud_terms, "term"),
         "citation_stats": citations,
         "most_cited_documents": cited_docs[: max(top_n, 20)],
         "research_overview": overview,
@@ -141,6 +145,7 @@ def run_bibliometric_analysis(
     _write_csv(summary["top_keywords"], out_dir / "top_keywords.csv", ["keyword", "count"])
     _write_csv(summary["top_title_terms"], out_dir / "title_terms.csv", ["term", "count"])
     _write_csv(summary["top_abstract_terms"], out_dir / "abstract_terms.csv", ["term", "count"])
+    _write_csv(summary["word_cloud_terms"], out_dir / "word_cloud_terms.csv", ["term", "count"])
     _write_csv(cited_docs, out_dir / "most_cited_documents.csv", [
         "rank",
         "citations",
@@ -252,6 +257,11 @@ def run_bibliometric_analysis(
         if abstract_terms:
             fig = plot_bar(abstract_terms, title=f"Top {max(top_n, 20)} termos no resumo", xlabel="Frequência")
             fig.savefig(out_dir / "abstract_terms_barh.png", dpi=150, bbox_inches="tight")
+            plt.close(fig)
+
+        if word_cloud_terms:
+            fig = plot_word_cloud(word_cloud_terms, title="Nuvem de palavras (titulo + resumo)")
+            fig.savefig(out_dir / "word_cloud.png", dpi=150, bbox_inches="tight")
             plt.close(fig)
 
         if cited_docs:

@@ -197,10 +197,10 @@ def main():
     author_documents_table = tables.get("author_document_counts.csv", pd.DataFrame()).copy()
     overview_table = tables.get("research_overview.csv", pd.DataFrame()).copy()
     records_table = tables.get("research_records.csv", pd.DataFrame()).copy()
-    title_terms_table = tables.get("title_terms.csv", pd.DataFrame()).copy()
-    abstract_terms_table = tables.get("abstract_terms.csv", pd.DataFrame()).copy()
+    word_cloud_terms_table = tables.get("word_cloud_terms.csv", pd.DataFrame()).copy()
     coauth_edges_table = tables.get("coauthorship_edges.csv", pd.DataFrame()).copy()
     coauth_graph_image = results["plots"].get("coauthorship_network.png")
+    word_cloud_image = results["plots"].get("word_cloud.png")
 
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Documentos", total_documents)
@@ -208,8 +208,8 @@ def main():
     col3.metric("Fim", period_end if period_end is not None else "-")
     col4.metric("Arestas coautoria", coauth_count)
 
-    tab_dashboard, tab_graph, tab_tables, tab_plots, tab_raw, tab_download = st.tabs(
-        ["Quadro da pesquisa", "Grafo", "Tabelas", "Graficos", "Resumo JSON", "Download"]
+    tab_dashboard, tab_word_cloud, tab_graph, tab_tables, tab_plots, tab_raw, tab_download = st.tabs(
+        ["Quadro da pesquisa", "Nuvem de palavras", "Grafo", "Tabelas", "Graficos", "Resumo JSON", "Download"]
     )
 
     with tab_dashboard:
@@ -274,19 +274,53 @@ def main():
                 display_cited = most_cited_table
             st.dataframe(display_cited, width="stretch", height=320)
 
-        col_kw_1, col_kw_2 = st.columns(2)
-        with col_kw_1:
-            st.subheader("Palavras-chave no titulo")
-            if title_terms_table.empty:
-                st.warning("Sem termos no titulo para exibir.")
+        st.subheader("Termos da nuvem de palavras")
+        st.caption("Frequencias combinadas a partir do titulo e do resumo.")
+        if word_cloud_terms_table.empty:
+            st.warning("Nao ha termos suficientes para montar a nuvem de palavras.")
+        else:
+            if "count" in word_cloud_terms_table.columns:
+                word_cloud_terms_table["count"] = pd.to_numeric(
+                    word_cloud_terms_table["count"],
+                    errors="coerce",
+                )
+                display_word_cloud_terms = word_cloud_terms_table.sort_values(
+                    by="count",
+                    ascending=False,
+                    na_position="last",
+                )
             else:
-                st.dataframe(title_terms_table, width="stretch", height=300)
-        with col_kw_2:
-            st.subheader("Palavras-chave no resumo")
-            if abstract_terms_table.empty:
-                st.warning("Sem termos no resumo para exibir.")
-            else:
-                st.dataframe(abstract_terms_table, width="stretch", height=300)
+                display_word_cloud_terms = word_cloud_terms_table
+            st.dataframe(display_word_cloud_terms.head(50), width="stretch", height=300)
+
+    with tab_word_cloud:
+        st.subheader("Nuvem de palavras")
+        st.caption("Visualizacao baseada nos termos mais frequentes de titulo e resumo.")
+        if word_cloud_image is None:
+            st.warning("A nuvem de palavras nao foi gerada para este arquivo.")
+        else:
+            st.image(
+                word_cloud_image,
+                caption="Nuvem de palavras gerada com os termos combinados de titulo e resumo",
+                width="stretch",
+            )
+
+        st.subheader("Tabela de termos da nuvem")
+        if word_cloud_terms_table.empty:
+            st.warning("Nao ha tabela de termos para a nuvem de palavras.")
+        else:
+            display_word_cloud_terms = word_cloud_terms_table.copy()
+            if "count" in display_word_cloud_terms.columns:
+                display_word_cloud_terms["count"] = pd.to_numeric(
+                    display_word_cloud_terms["count"],
+                    errors="coerce",
+                )
+                display_word_cloud_terms = display_word_cloud_terms.sort_values(
+                    by="count",
+                    ascending=False,
+                    na_position="last",
+                )
+            st.dataframe(display_word_cloud_terms, width="stretch", height=360)
 
     with tab_tables:
         if not tables:

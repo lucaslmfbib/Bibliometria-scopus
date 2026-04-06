@@ -364,6 +364,22 @@ def abstract_term_frequency(df, n: int = 30) -> List[Tuple[str, int]]:
     return _term_frequency(df.get("Abstract"), n=n)
 
 
+def word_cloud_term_frequency(df, n: int = 100) -> List[Tuple[str, int]]:
+    counter = Counter()
+    for column in ("Title", "Abstract"):
+        series = df.get(column)
+        if series is None:
+            continue
+        for text in series.dropna().astype(str):
+            for token in _TOKEN_PATTERN.findall(text.lower()):
+                if len(token) < 3:
+                    continue
+                if token in _STOPWORDS:
+                    continue
+                counter[token] += 1
+    return counter.most_common(n)
+
+
 def most_cited_documents(df, n: int = 100) -> List[Dict[str, object]]:
     import pandas as pd
 

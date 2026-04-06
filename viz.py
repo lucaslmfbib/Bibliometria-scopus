@@ -101,6 +101,44 @@ def plot_pie_top(items, title: str = None, top_n: int = 10):
     return fig
 
 
+def plot_word_cloud(items, title: str = None):
+    plt = _get_pyplot()
+
+    if hasattr(items, "items"):
+        frequencies = dict(items.items())
+    else:
+        frequencies = dict(items)
+    if not frequencies:
+        fig, _ = plt.subplots()
+        return fig
+
+    try:
+        from wordcloud import WordCloud
+    except ImportError:
+        return plot_bar(
+            frequencies,
+            title=title or "Nuvem de palavras",
+            xlabel="Frequência",
+            top_n=min(len(frequencies), 30),
+        )
+
+    cloud = WordCloud(
+        width=1400,
+        height=800,
+        background_color="white",
+        colormap="viridis",
+        prefer_horizontal=0.9,
+    ).generate_from_frequencies(frequencies)
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ax.imshow(cloud, interpolation="bilinear")
+    ax.axis("off")
+    if title:
+        ax.set_title(title)
+    fig.tight_layout()
+    return fig
+
+
 def plot_author_trends(author_year_matrix, title: str = None):
     plt = _get_pyplot()
 
