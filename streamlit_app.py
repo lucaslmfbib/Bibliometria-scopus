@@ -1262,16 +1262,36 @@ def main():
 
     with st.sidebar:
         st.header("Configuracoes")
-        top_n = st.slider("Top N", min_value=5, max_value=100, value=20, step=1)
-        encoding = st.text_input("Encoding CSV (opcional)", value="")
-        sheet_name = st.text_input("Aba do Excel (indice ou nome)", value="0")
-        generate_plots = st.checkbox("Gerar graficos", value=True)
+        top_n = st.slider(
+            "Top N",
+            min_value=5,
+            max_value=100,
+            value=20,
+            step=1,
+            help="Define quantos itens aparecem nos rankings principais, como autores, termos e documentos mais citados.",
+        )
+        encoding = st.text_input(
+            "Encoding CSV (opcional)",
+            value="",
+            help="Use apenas se o CSV vier com erro de acentuacao ou falha de leitura. Exemplos comuns: utf-8, latin-1 ou cp1252.",
+        )
+        sheet_name = st.text_input(
+            "Aba do Excel (indice ou nome)",
+            value="0",
+            help="Escolhe qual aba do arquivo Excel sera lida. Use 0 para a primeira aba ou informe o nome exato da planilha.",
+        )
+        generate_plots = st.checkbox(
+            "Gerar graficos",
+            value=True,
+            help="Quando ativado, o app gera imagens e visualizacoes. Se desativar, a analise fica mais leve e rapida.",
+        )
         network_max_authors = st.slider(
             "Maximo de autores no grafo",
             min_value=10,
             max_value=100,
             value=30,
             step=1,
+            help="Limita quantos autores entram no grafo de coautoria. Valores maiores deixam a rede mais completa, mas tambem mais pesada e visualmente poluida.",
         )
         network_min_weight = st.slider(
             "Peso minimo da aresta",
@@ -1279,6 +1299,7 @@ def main():
             max_value=10,
             value=1,
             step=1,
+            help="Filtra conexoes fracas no grafo. Com 1, todas as coautorias aparecem. Com 2 ou mais, o grafo fica mais limpo.",
         )
 
         if social_links:
