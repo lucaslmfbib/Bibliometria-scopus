@@ -181,6 +181,20 @@ def _inject_styles():
             -webkit-text-fill-color: currentColor;
         }
 
+        div[data-testid="stFileUploader"] {
+            color-scheme: light !important;
+        }
+
+        div[data-testid="stFileUploader"] > div,
+        div[data-testid="stFileUploader"] > section,
+        div[data-testid="stFileUploader"] section,
+        div[data-testid="stFileUploader"] section > div,
+        div[data-testid="stFileUploader"] section > div > div {
+            color-scheme: light !important;
+            -webkit-appearance: none !important;
+            appearance: none !important;
+        }
+
         div[data-testid="stFileUploader"] > section {
             background: rgba(255, 250, 243, 0.98) !important;
             border: 1px solid var(--line) !important;
@@ -189,18 +203,25 @@ def _inject_styles():
             color-scheme: light !important;
         }
 
+        div[data-testid="stFileUploader"] [data-testid="stWidgetLabel"],
+        div[data-testid="stFileUploader"] [data-testid="stWidgetLabel"] *,
         div[data-testid="stFileUploader"] label,
         div[data-testid="stFileUploader"] p,
         div[data-testid="stFileUploader"] small,
         div[data-testid="stFileUploader"] span {
             color: var(--ink) !important;
+            -webkit-text-fill-color: var(--ink) !important;
         }
 
-        div[data-testid="stFileUploaderDropzone"] {
+        div[data-testid="stFileUploaderDropzone"],
+        div[data-testid="stFileUploaderDropzone"] > div,
+        div[data-testid="stFileUploaderDropzone"] > div > div {
             background: rgba(255, 255, 255, 0.86) !important;
             border: 1px dashed rgba(39, 31, 24, 0.18) !important;
             border-radius: 18px !important;
             color-scheme: light !important;
+            -webkit-appearance: none !important;
+            appearance: none !important;
         }
 
         div[data-testid="stFileUploader"] * {
@@ -211,18 +232,25 @@ def _inject_styles():
         div[data-testid="stFileUploaderDropzoneInstructions"] span,
         div[data-testid="stFileUploaderDropzoneInstructions"] small {
             color: var(--ink) !important;
+            -webkit-text-fill-color: var(--ink) !important;
         }
 
-        div[data-testid="stFileUploader"] button {
+        div[data-testid="stFileUploader"] button,
+        div[data-testid="stFileUploader"] [data-baseweb="button"],
+        div[data-testid="stFileUploader"] [role="button"] {
             background: rgba(255, 255, 255, 0.96) !important;
             color: var(--ink) !important;
             border: 1px solid var(--line) !important;
             box-shadow: none !important;
+            -webkit-text-fill-color: var(--ink) !important;
         }
 
-        div[data-testid="stFileUploader"] button:hover {
+        div[data-testid="stFileUploader"] button:hover,
+        div[data-testid="stFileUploader"] [data-baseweb="button"]:hover,
+        div[data-testid="stFileUploader"] [role="button"]:hover {
             border-color: rgba(181, 79, 45, 0.28) !important;
             color: var(--accent) !important;
+            -webkit-text-fill-color: var(--accent) !important;
         }
 
         div[data-testid="stFileUploader"] [data-testid="stFileUploaderFile"] {
@@ -239,6 +267,14 @@ def _inject_styles():
         div[data-testid="stFileUploader"] [data-testid="stFileUploaderFileName"] * {
             color: var(--ink) !important;
             -webkit-text-fill-color: var(--ink) !important;
+        }
+
+        div[data-testid="stFileUploader"] svg,
+        div[data-testid="stFileUploader"] svg *,
+        div[data-testid="stFileUploader"] path {
+            fill: rgba(181, 79, 45, 0.9) !important;
+            stroke: rgba(181, 79, 45, 0.9) !important;
+            color: rgba(181, 79, 45, 0.9) !important;
         }
 
         div[data-testid="stFileUploader"] input,
