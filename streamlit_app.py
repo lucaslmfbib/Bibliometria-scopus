@@ -674,14 +674,31 @@ def _inject_styles():
             margin-top: 0.45rem;
         }
 
-        .stButton button {
+        .stButton button,
+        .stDownloadButton button {
             background: linear-gradient(135deg, #b54f2d, #c96c45);
-            color: #fffaf4;
+            color: #fffaf4 !important;
+            -webkit-text-fill-color: #fffaf4 !important;
             border: none;
             border-radius: 999px;
             font-weight: 700;
             padding: 0.7rem 1.15rem;
             box-shadow: 0 12px 25px rgba(181, 79, 45, 0.22);
+        }
+
+        .stButton button *,
+        .stDownloadButton button * {
+            color: #fffaf4 !important;
+            -webkit-text-fill-color: #fffaf4 !important;
+        }
+
+        .stButton button:hover,
+        .stButton button:focus,
+        .stDownloadButton button:hover,
+        .stDownloadButton button:focus {
+            color: #fffaf4 !important;
+            -webkit-text-fill-color: #fffaf4 !important;
+            filter: brightness(1.02);
         }
 
         .stTabs [data-baseweb="tab-list"] {
