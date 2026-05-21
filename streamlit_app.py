@@ -746,6 +746,23 @@ def _render_upload_notes():
     )
 
 
+def _empty_table_reason(table_name: str) -> str:
+    reasons = {
+        "abstract_terms.csv": "Esta tabela fica vazia quando a base nao traz resumos utilizaveis ou quando os resumos nao possuem termos suficientes apos a limpeza.",
+        "title_terms.csv": "Esta tabela fica vazia quando a base nao traz titulos utilizaveis ou quando os titulos nao possuem termos suficientes apos a limpeza.",
+        "most_cited_documents.csv": "Esta tabela fica vazia quando a base nao possui uma coluna de citacoes valida, como 'Cited by'.",
+        "citations_by_year.csv": "Esta tabela depende de ano de publicacao e citacoes validas ao mesmo tempo.",
+        "citation_stats.csv": "Esta tabela depende de uma coluna de citacoes valida, como 'Cited by'.",
+        "coauthorship_edges.csv": "Esta tabela fica vazia quando nao ha coautorias suficientes para formar arestas no grafo.",
+        "word_cloud_terms.csv": "Esta tabela depende de termos validos em titulo e resumo.",
+        "research_records.csv": "Esta tabela depende de colunas bibliograficas reconhecidas, como titulo, autores, ano ou resumo.",
+    }
+    return reasons.get(
+        table_name,
+        "Esta tabela foi gerada, mas a base atual nao trouxe dados suficientes para preencher esse resultado.",
+    )
+
+
 def _render_workspace_summary(
     upload_name: str,
     total_documents: Any,
@@ -1110,8 +1127,23 @@ def main():
         if not tables:
             st.warning("Nenhuma tabela CSV foi gerada.")
         else:
-            selected_table = st.selectbox("Tabela", list(tables.keys()))
-            st.dataframe(tables[selected_table], width="stretch")
+            non_empty_tables = [name for name, df in tables.items() if not df.empty]
+            empty_tables = [name for name, df in tables.items() if df.empty]
+            ordered_tables = non_empty_tables + empty_tables
+
+            if empty_tables:
+                st.caption(
+                    f"Tabelas com dados: {len(non_empty_tables)} | tabelas vazias: {len(empty_tables)}"
+                )
+
+            selected_table = st.selectbox("Tabela", ordered_tables, index=0)
+            selected_df = tables[selected_table]
+
+            if selected_df.empty:
+                st.warning(f"`{selected_table}` esta vazia.")
+                st.caption(_empty_table_reason(selected_table))
+            else:
+                st.dataframe(selected_df, width="stretch")
 
     with tab_graph:
         st.subheader("Grafo de coautoria")
