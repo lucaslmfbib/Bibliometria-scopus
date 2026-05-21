@@ -95,6 +95,7 @@ def _inject_styles():
             border: 1px solid var(--line) !important;
             box-shadow: var(--shadow);
             padding: 0.35rem;
+            color-scheme: light !important;
         }
 
         div[data-testid="stFileUploader"] label,
@@ -108,6 +109,11 @@ def _inject_styles():
             background: rgba(255, 255, 255, 0.86) !important;
             border: 1px dashed rgba(39, 31, 24, 0.18) !important;
             border-radius: 18px !important;
+            color-scheme: light !important;
+        }
+
+        div[data-testid="stFileUploader"] * {
+            color-scheme: light !important;
         }
 
         div[data-testid="stFileUploaderDropzoneInstructions"] div,
@@ -136,6 +142,19 @@ def _inject_styles():
 
         div[data-testid="stFileUploader"] [data-testid="stFileUploaderFile"] * {
             color: var(--ink) !important;
+        }
+
+        div[data-testid="stFileUploader"] [data-testid="stFileUploaderFileName"],
+        div[data-testid="stFileUploader"] [data-testid="stFileUploaderFileName"] * {
+            color: var(--ink) !important;
+            -webkit-text-fill-color: var(--ink) !important;
+        }
+
+        div[data-testid="stFileUploader"] input,
+        div[data-testid="stFileUploader"] input::file-selector-button {
+            color: var(--ink) !important;
+            -webkit-text-fill-color: var(--ink) !important;
+            color-scheme: light !important;
         }
 
         .hero-shell {
@@ -471,10 +490,20 @@ def _inject_styles():
             padding: 0.35rem 0.8rem;
         }
 
+        .stTabs [data-baseweb="tab"] p,
+        .stTabs [data-baseweb="tab"] span {
+            color: var(--muted) !important;
+        }
+
         .stTabs [aria-selected="true"] {
             background: rgba(181, 79, 45, 0.12);
             color: var(--accent);
             border-color: rgba(181, 79, 45, 0.26);
+        }
+
+        .stTabs [aria-selected="true"] p,
+        .stTabs [aria-selected="true"] span {
+            color: var(--accent) !important;
         }
 
         @media (max-width: 980px) {
@@ -631,6 +660,28 @@ def _render_empty_workspace():
                 </div>
             </div>
         </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _render_upload_notes():
+    st.markdown(
+        """
+        <div class="mini-module-grid">
+            <div class="mini-module">
+                <strong>Entradas aceitas</strong>
+                <span>CSV, Excel (XLS/XLSX) e BibTeX (BIB).</span>
+            </div>
+            <div class="mini-module">
+                <strong>Saidas do workspace</strong>
+                <span>Tabelas, grafo, nuvem de palavras, graficos e pacote ZIP.</span>
+            </div>
+            <div class="mini-module">
+                <strong>Uso recomendado</strong>
+                <span>Envie a base, rode a leitura e depois navegue pelas abas do resultado.</span>
+            </div>
+        </div>
         """,
         unsafe_allow_html=True,
     )
@@ -822,27 +873,13 @@ def main():
     with st.container(border=True):
         st.subheader("Central de envio")
         st.caption("Carregue a base bibliografica e inicie a leitura analitica do workspace.")
-        upload_meta_col, upload_input_col = st.columns([0.38, 0.62], gap="large")
-        with upload_meta_col:
-            st.markdown("**Entradas aceitas**")
-            st.caption("CSV, Excel (`.xls` / `.xlsx`) e BibTeX (`.bib`).")
-            st.markdown("**Saidas do workspace**")
-            st.caption("Tabelas, grafo, nuvem de palavras, graficos e pacote ZIP.")
-            st.markdown("**Uso recomendado**")
-            st.caption("Envie a base, rode a leitura e depois navegue pelas abas do resultado.")
-        with upload_input_col:
-            uploaded_file = st.file_uploader(
-                "Arquivo bibliografico",
-                type=["csv", "xls", "xlsx", "bib"],
-                help="Aceita CSV, XLS, XLSX e BibTeX (.bib).",
-            )
-            run_button = st.button("Rodar analise", type="primary", disabled=uploaded_file is None)
-
-    guide_col, module_col = st.columns([1, 1], gap="large")
-    with guide_col:
-        _render_process_steps()
-    with module_col:
-        _render_feature_cards()
+        uploaded_file = st.file_uploader(
+            "Arquivo bibliografico",
+            type=["csv", "xls", "xlsx", "bib"],
+            help="Aceita CSV, XLS, XLSX e BibTeX (.bib).",
+        )
+        run_button = st.button("Rodar analise", type="primary", disabled=uploaded_file is None)
+        _render_upload_notes()
 
     if run_button and uploaded_file is not None:
         with st.spinner("Processando analise bibliometrica..."):
@@ -862,6 +899,11 @@ def main():
 
     results = st.session_state.get("results")
     if not results:
+        guide_col, module_col = st.columns([1, 1], gap="large")
+        with guide_col:
+            _render_process_steps()
+        with module_col:
+            _render_feature_cards()
         st.info("Envie um arquivo e clique em 'Rodar analise' para abrir o workspace da pesquisa.")
         _render_empty_workspace()
         return
