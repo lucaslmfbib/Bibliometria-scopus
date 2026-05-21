@@ -28,6 +28,360 @@ TOP_SOCIAL_LINKS = {
 }
 
 
+def _inject_styles():
+    st.markdown(
+        """
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+        :root {
+            --bg-main: #f4efe6;
+            --bg-panel: rgba(255, 250, 243, 0.92);
+            --bg-panel-strong: #fffaf2;
+            --ink: #1d1b18;
+            --muted: #726a5f;
+            --line: rgba(39, 31, 24, 0.12);
+            --accent: #b54f2d;
+            --accent-2: #215347;
+            --shadow: 0 20px 60px rgba(41, 26, 17, 0.08);
+            --radius-lg: 24px;
+            --radius-md: 18px;
+        }
+
+        .stApp {
+            background:
+                radial-gradient(circle at top left, rgba(181, 79, 45, 0.10), transparent 30%),
+                radial-gradient(circle at top right, rgba(33, 83, 71, 0.12), transparent 34%),
+                linear-gradient(180deg, #f7f2ea 0%, #f2ebe0 100%);
+            color: var(--ink);
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+
+        .block-container {
+            padding-top: 2rem;
+            padding-bottom: 3rem;
+            max-width: 1280px;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--ink);
+            letter-spacing: -0.03em;
+        }
+
+        [data-testid="stSidebar"] {
+            background: linear-gradient(180deg, rgba(32, 30, 27, 0.95), rgba(24, 22, 20, 0.98));
+            border-right: 1px solid rgba(255,255,255,0.06);
+        }
+
+        [data-testid="stSidebar"] * {
+            color: #f8efe4;
+        }
+
+        div[data-testid="stFileUploader"] > section,
+        div[data-testid="stVerticalBlock"] div[data-testid="stTabs"] + div,
+        div[data-testid="stDataFrame"],
+        div[data-testid="stTable"] {
+            border-radius: var(--radius-md);
+        }
+
+        .hero-shell {
+            background: linear-gradient(135deg, rgba(255,250,243,0.96), rgba(247,236,224,0.94));
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 1.4rem 1.5rem 1.2rem 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--accent-2);
+            background: rgba(33, 83, 71, 0.10);
+            border: 1px solid rgba(33, 83, 71, 0.18);
+            border-radius: 999px;
+            padding: 0.45rem 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .hero-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2rem, 4vw, 3.6rem);
+            line-height: 0.95;
+            margin: 0;
+            color: var(--ink);
+        }
+
+        .hero-subtitle {
+            margin: 0.85rem 0 0 0;
+            max-width: 860px;
+            color: var(--muted);
+            font-size: 1.02rem;
+            line-height: 1.65;
+        }
+
+        .social-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 1rem;
+        }
+
+        .social-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            text-decoration: none;
+            color: var(--ink);
+            background: rgba(255,255,255,0.82);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 0.55rem 0.9rem;
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+
+        .author-note {
+            margin-top: 0.7rem;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .workspace-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 1.2rem 1.3rem;
+            margin: 1rem 0 1.1rem 0;
+        }
+
+        .workspace-title {
+            font-family: 'Space Grotesk', sans-serif;
+            margin: 0;
+            font-size: 1.35rem;
+        }
+
+        .workspace-text {
+            color: var(--muted);
+            margin-top: 0.45rem;
+            line-height: 1.6;
+        }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+            margin-top: 0.9rem;
+        }
+
+        .chip {
+            padding: 0.55rem 0.8rem;
+            background: rgba(33, 83, 71, 0.07);
+            border: 1px solid rgba(33, 83, 71, 0.16);
+            border-radius: 999px;
+            color: var(--accent-2);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.9rem;
+            margin: 1rem 0 1.2rem 0;
+        }
+
+        .feature-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            padding: 1rem 1rem 0.9rem 1rem;
+            min-height: 150px;
+            box-shadow: var(--shadow);
+        }
+
+        .feature-card strong {
+            display: block;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.02rem;
+            margin-bottom: 0.45rem;
+        }
+
+        .feature-card span {
+            color: var(--muted);
+            line-height: 1.55;
+            font-size: 0.95rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.9rem;
+            margin: 0.8rem 0 1rem 0;
+        }
+
+        .stat-card {
+            background: var(--bg-panel-strong);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow);
+            padding: 1rem 1rem 0.9rem 1rem;
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+        }
+
+        .stat-value {
+            color: var(--ink);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.7rem;
+            line-height: 1.1;
+            margin-top: 0.45rem;
+        }
+
+        .stButton button {
+            background: linear-gradient(135deg, #b54f2d, #c96c45);
+            color: #fffaf4;
+            border: none;
+            border-radius: 999px;
+            font-weight: 700;
+            padding: 0.7rem 1.15rem;
+            box-shadow: 0 12px 25px rgba(181, 79, 45, 0.22);
+        }
+
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 0.45rem;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+            background: rgba(255,255,255,0.65);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 0.35rem 0.8rem;
+        }
+
+        .stTabs [aria-selected="true"] {
+            background: rgba(181, 79, 45, 0.12);
+            color: var(--accent);
+            border-color: rgba(181, 79, 45, 0.26);
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _render_hero(social_links: Dict[str, str]):
+    social_html = ""
+    if social_links:
+        pills = [
+            f'<a class="social-pill" href="{url}" target="_blank">{label}</a>'
+            for label, url in social_links.items()
+        ]
+        social_html = f'<div class="social-row">{"".join(pills)}</div>'
+
+    st.markdown(
+        f"""
+        <section class="hero-shell">
+            <div class="hero-badge">Plataforma de Analise Bibliometrica</div>
+            <h1 class="hero-title">Bibliometria em nuvem, com cara de software.</h1>
+            <p class="hero-subtitle">
+                Envie um arquivo CSV, Excel ou BibTeX e trabalhe em um painel unico com
+                indicadores, tabelas, grafo de coautoria, nuvem de palavras e pacotes
+                prontos para exportacao.
+            </p>
+            <div class="author-note">Criado pelo Bibliotecário e Advogado Lucas Martins</div>
+            {social_html}
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _render_feature_cards():
+    st.markdown(
+        """
+        <div class="feature-grid">
+            <div class="feature-card">
+                <strong>Upload inteligente</strong>
+                <span>Suporte para CSV, Excel e BibTeX com leitura automatica de campos bibliograficos.</span>
+            </div>
+            <div class="feature-card">
+                <strong>Painel analitico</strong>
+                <span>Metricas, ranking de autores, citacoes, crescimento anual e visoes prontas para leitura.</span>
+            </div>
+            <div class="feature-card">
+                <strong>Visualizacoes executivas</strong>
+                <span>Grafo de coautoria, nuvem de palavras, series temporais e imagens exportaveis.</span>
+            </div>
+            <div class="feature-card">
+                <strong>Entrega em lote</strong>
+                <span>Baixe ZIP com tabelas CSV, resumo JSON e figuras para apresentar ou continuar a analise.</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _render_workspace_summary(
+    upload_name: str,
+    total_documents: Any,
+    period_start: Any,
+    period_end: Any,
+    table_count: int,
+    plot_count: int,
+):
+    chip_values = [
+        f"Arquivo: {upload_name}" if upload_name else "Arquivo processado",
+        f"Tabelas: {table_count}",
+        f"Graficos: {plot_count}",
+        "Formato cloud workspace",
+    ]
+    chips = "".join(f'<div class="chip">{value}</div>' for value in chip_values)
+    st.markdown(
+        f"""
+        <section class="workspace-card">
+            <h2 class="workspace-title">Workspace da analise</h2>
+            <p class="workspace-text">
+                Seu arquivo foi processado e os resultados estao organizados em modulos.
+                Navegue entre quadro, nuvem de palavras, grafo, tabelas, graficos e exportacao.
+            </p>
+            <div class="chip-row">{chips}</div>
+        </section>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Documentos</div>
+                <div class="stat-value">{total_documents if total_documents is not None else "-"}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Inicio do periodo</div>
+                <div class="stat-value">{period_start if period_start is not None else "-"}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Fim do periodo</div>
+                <div class="stat-value">{period_end if period_end is not None else "-"}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Modulos ativos</div>
+                <div class="stat-value">6+</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def _parse_sheet_name(raw_value: str):
     value = raw_value.strip()
     if not value:
@@ -114,6 +468,7 @@ def _run_analysis(
         summary_json = (output_dir / "summary.json").read_text(encoding="utf-8")
 
         return {
+            "upload_name": upload_name,
             "summary": summary,
             "summary_json": summary_json,
             "tables": tables,
@@ -124,13 +479,9 @@ def _run_analysis(
 
 def main():
     st.set_page_config(page_title="Bibliometria", layout="wide")
+    _inject_styles()
     social_links = _get_social_links()
-    st.caption("Criado pelo Bibliotecário e Advogado Lucas Martins")
-    if social_links:
-        links_line = " | ".join(f"[{label}]({url})" for label, url in social_links.items())
-        st.markdown(links_line)
-    st.title("Analise Bibliometrica com CSV, Excel ou BibTeX")
-    st.caption("Envie um arquivo (.csv, .xlsx ou .bib) e gere tabelas, graficos e grafo de coautoria.")
+    _render_hero(social_links)
 
     with st.sidebar:
         st.header("Configuracoes")
@@ -159,13 +510,21 @@ def main():
             for label, url in social_links.items():
                 st.markdown(f"- [{label}]({url})")
 
-    uploaded_file = st.file_uploader(
-        "Arquivo bibliografico",
-        type=["csv", "xls", "xlsx", "bib"],
-        help="Aceita CSV, XLS, XLSX e BibTeX (.bib).",
-    )
+    upload_col, info_col = st.columns([1.3, 0.7], gap="large")
+    with upload_col:
+        st.subheader("Central de envio")
+        st.caption("Carregue a base bibliografica e inicie a leitura analitica do workspace.")
+        uploaded_file = st.file_uploader(
+            "Arquivo bibliografico",
+            type=["csv", "xls", "xlsx", "bib"],
+            help="Aceita CSV, XLS, XLSX e BibTeX (.bib).",
+        )
+        run_button = st.button("Rodar analise", type="primary", disabled=uploaded_file is None)
+    with info_col:
+        st.subheader("Fluxo de trabalho")
+        st.caption("Uma jornada simples para transformar bases bibliograficas em evidencias visuais.")
+        _render_feature_cards()
 
-    run_button = st.button("Rodar analise", type="primary", disabled=uploaded_file is None)
     if run_button and uploaded_file is not None:
         with st.spinner("Processando analise bibliometrica..."):
             try:
@@ -184,11 +543,12 @@ def main():
 
     results = st.session_state.get("results")
     if not results:
-        st.info("Envie um arquivo e clique em 'Rodar analise'.")
+        st.info("Envie um arquivo e clique em 'Rodar analise' para abrir o workspace da pesquisa.")
         return
 
     summary = results["summary"]
     tables = results["tables"]
+    upload_name = results.get("upload_name", "")
     total_documents = summary.get("total_documents")
     period_start = summary.get("period_start")
     period_end = summary.get("period_end")
@@ -201,12 +561,15 @@ def main():
     coauth_edges_table = tables.get("coauthorship_edges.csv", pd.DataFrame()).copy()
     coauth_graph_image = results["plots"].get("coauthorship_network.png")
     word_cloud_image = results["plots"].get("word_cloud.png")
-
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Documentos", total_documents)
-    col2.metric("Inicio", period_start if period_start is not None else "-")
-    col3.metric("Fim", period_end if period_end is not None else "-")
-    col4.metric("Arestas coautoria", coauth_count)
+    _render_workspace_summary(
+        upload_name=upload_name,
+        total_documents=total_documents,
+        period_start=period_start,
+        period_end=period_end,
+        table_count=len(tables),
+        plot_count=len(results["plots"]),
+    )
+    st.caption(f"Arestas de coautoria identificadas: {coauth_count}")
 
     tab_dashboard, tab_word_cloud, tab_graph, tab_tables, tab_plots, tab_raw, tab_download = st.tabs(
         ["Quadro da pesquisa", "Nuvem de palavras", "Grafo", "Tabelas", "Graficos", "Resumo JSON", "Download"]
