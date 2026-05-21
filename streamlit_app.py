@@ -149,6 +149,38 @@ def _inject_styles():
             -webkit-text-fill-color: var(--ink) !important;
         }
 
+        div[data-testid="stRadio"] *,
+        div[data-testid="stRadio"] label,
+        div[data-testid="stRadio"] p,
+        div[data-testid="stRadio"] span {
+            color: var(--ink) !important;
+            -webkit-text-fill-color: var(--ink) !important;
+        }
+
+        div[data-testid="stRadio"] [role="radiogroup"] {
+            color-scheme: light !important;
+        }
+
+        div[data-testid="stSelectbox"] label,
+        div[data-testid="stSelectbox"] p,
+        div[data-testid="stSelectbox"] span,
+        div[data-testid="stSelectbox"] * {
+            color: var(--ink) !important;
+            -webkit-text-fill-color: var(--ink) !important;
+        }
+
+        div[data-testid="stSelectbox"] [data-baseweb="select"] {
+            background: rgba(255, 255, 255, 0.92) !important;
+            border-radius: 16px !important;
+            color-scheme: light !important;
+        }
+
+        div[data-testid="stMarkdownContainer"] p,
+        div[data-testid="stCaptionContainer"] p {
+            color: var(--muted);
+            -webkit-text-fill-color: currentColor;
+        }
+
         div[data-testid="stFileUploader"] > section {
             background: rgba(255, 250, 243, 0.98) !important;
             border: 1px solid var(--line) !important;
