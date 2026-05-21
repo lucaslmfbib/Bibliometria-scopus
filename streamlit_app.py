@@ -32,8 +32,6 @@ def _inject_styles():
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
-
         :root {
             --bg-main: #f4efe6;
             --bg-panel: rgba(255, 250, 243, 0.92);
@@ -46,6 +44,8 @@ def _inject_styles():
             --shadow: 0 20px 60px rgba(41, 26, 17, 0.08);
             --radius-lg: 24px;
             --radius-md: 18px;
+            --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Avenir Next", "Helvetica Neue", sans-serif;
+            --font-display: "Avenir Next", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
             color-scheme: light;
         }
 
@@ -65,7 +65,7 @@ def _inject_styles():
                 radial-gradient(circle at top right, rgba(33, 83, 71, 0.12), transparent 34%),
                 linear-gradient(180deg, #f7f2ea 0%, #f2ebe0 100%);
             color: var(--ink);
-            font-family: 'IBM Plex Sans', sans-serif;
+            font-family: var(--font-body);
         }
 
         .block-container {
@@ -75,7 +75,7 @@ def _inject_styles():
         }
 
         h1, h2, h3 {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: var(--font-display);
             color: var(--ink);
             letter-spacing: -0.03em;
         }
@@ -308,7 +308,7 @@ def _inject_styles():
         }
 
         .hero-title {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: var(--font-display);
             font-size: clamp(2rem, 4vw, 3.6rem);
             line-height: 0.95;
             margin: 0;
@@ -360,7 +360,7 @@ def _inject_styles():
         }
 
         .workspace-title {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: var(--font-display);
             margin: 0;
             font-size: 1.35rem;
         }
@@ -406,7 +406,7 @@ def _inject_styles():
 
         .feature-card strong {
             display: block;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: var(--font-display);
             font-size: 1.02rem;
             margin-bottom: 0.45rem;
         }
@@ -441,7 +441,7 @@ def _inject_styles():
         }
 
         .panel-title {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: var(--font-display);
             font-size: 1.28rem;
             margin: 0;
             color: var(--ink);
@@ -479,7 +479,7 @@ def _inject_styles():
             background: rgba(33, 83, 71, 0.12);
             color: var(--accent-2);
             font-weight: 700;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: var(--font-display);
         }
 
         .step-copy strong {
@@ -610,7 +610,7 @@ def _inject_styles():
         .insight-value {
             display: block;
             color: var(--ink);
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: var(--font-display);
             font-size: 1.18rem;
             line-height: 1.2;
             margin-top: 0.45rem;
@@ -668,7 +668,7 @@ def _inject_styles():
 
         .stat-value {
             color: var(--ink);
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: var(--font-display);
             font-size: 1.7rem;
             line-height: 1.1;
             margin-top: 0.45rem;
