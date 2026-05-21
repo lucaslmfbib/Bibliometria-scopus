@@ -91,7 +91,7 @@ def _inject_styles():
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow);
             padding: 1.4rem 1.5rem 1.2rem 1.5rem;
-            margin-bottom: 1rem;
+            margin-bottom: 1.1rem;
         }
 
         .hero-badge {
@@ -192,8 +192,8 @@ def _inject_styles():
         .feature-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 0.9rem;
-            margin: 1rem 0 1.2rem 0;
+            gap: 0.8rem;
+            margin: 0;
         }
 
         .feature-card {
@@ -201,7 +201,7 @@ def _inject_styles():
             border: 1px solid var(--line);
             border-radius: var(--radius-md);
             padding: 1rem 1rem 0.9rem 1rem;
-            min-height: 150px;
+            min-height: 0;
             box-shadow: var(--shadow);
         }
 
@@ -216,6 +216,154 @@ def _inject_styles():
             color: var(--muted);
             line-height: 1.55;
             font-size: 0.95rem;
+        }
+
+        .panel-shell {
+            background: var(--bg-panel);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 1.1rem 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .panel-kicker {
+            display: inline-block;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.11em;
+            color: var(--accent);
+            background: rgba(181, 79, 45, 0.08);
+            border: 1px solid rgba(181, 79, 45, 0.15);
+            border-radius: 999px;
+            padding: 0.38rem 0.7rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .panel-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.28rem;
+            margin: 0;
+            color: var(--ink);
+        }
+
+        .panel-text {
+            color: var(--muted);
+            line-height: 1.65;
+            margin: 0.55rem 0 0 0;
+        }
+
+        .step-list {
+            display: grid;
+            gap: 0.8rem;
+            margin-top: 0.95rem;
+        }
+
+        .step-item {
+            display: grid;
+            grid-template-columns: 2.1rem 1fr;
+            gap: 0.85rem;
+            align-items: start;
+            padding: 0.85rem 0.9rem;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.66);
+            border: 1px solid var(--line);
+        }
+
+        .step-number {
+            width: 2.1rem;
+            height: 2.1rem;
+            display: grid;
+            place-items: center;
+            border-radius: 999px;
+            background: rgba(33, 83, 71, 0.12);
+            color: var(--accent-2);
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .step-copy strong {
+            display: block;
+            font-size: 0.97rem;
+            color: var(--ink);
+            margin-bottom: 0.2rem;
+        }
+
+        .step-copy span {
+            display: block;
+            color: var(--muted);
+            line-height: 1.55;
+            font-size: 0.93rem;
+        }
+
+        .empty-workspace {
+            background: linear-gradient(135deg, rgba(255,250,243,0.9), rgba(248,240,230,0.92));
+            border: 1px dashed rgba(39, 31, 24, 0.2);
+            border-radius: var(--radius-lg);
+            padding: 1.2rem 1.25rem;
+            margin-top: 0.7rem;
+        }
+
+        .empty-workspace h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .empty-workspace p {
+            color: var(--muted);
+            line-height: 1.65;
+            margin: 0.55rem 0 0 0;
+        }
+
+        .mini-module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.95rem;
+        }
+
+        .mini-module {
+            background: rgba(255,255,255,0.68);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 0.85rem 0.9rem;
+        }
+
+        .mini-module strong {
+            display: block;
+            font-size: 0.94rem;
+            color: var(--ink);
+            margin-bottom: 0.25rem;
+        }
+
+        .mini-module span {
+            display: block;
+            color: var(--muted);
+            font-size: 0.89rem;
+            line-height: 1.5;
+        }
+
+        .workspace-banner {
+            background: linear-gradient(135deg, rgba(255,250,243,0.96), rgba(247,236,224,0.9));
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 0.95rem 1.05rem;
+            margin: 0.35rem 0 0.95rem 0;
+        }
+
+        .workspace-banner strong {
+            display: block;
+            font-size: 1rem;
+            color: var(--ink);
+            margin-bottom: 0.25rem;
+        }
+
+        .workspace-banner span {
+            color: var(--muted);
+            line-height: 1.55;
+            font-size: 0.92rem;
         }
 
         .stats-grid {
@@ -275,6 +423,28 @@ def _inject_styles():
             color: var(--accent);
             border-color: rgba(181, 79, 45, 0.26);
         }
+
+        @media (max-width: 980px) {
+            .block-container {
+                padding-top: 1.2rem;
+            }
+
+            .hero-shell,
+            .workspace-card,
+            .panel-shell,
+            .empty-workspace,
+            .workspace-banner {
+                padding: 1rem;
+            }
+
+            .hero-title {
+                font-size: clamp(1.8rem, 9vw, 2.5rem);
+            }
+
+            .mini-module-grid {
+                grid-template-columns: 1fr;
+            }
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -311,24 +481,103 @@ def _render_hero(social_links: Dict[str, str]):
 def _render_feature_cards():
     st.markdown(
         """
-        <div class="feature-grid">
-            <div class="feature-card">
-                <strong>Upload inteligente</strong>
-                <span>Suporte para CSV, Excel e BibTeX com leitura automatica de campos bibliograficos.</span>
+        <section class="panel-shell">
+            <div class="panel-kicker">Modulos do sistema</div>
+            <h2 class="panel-title">O que voce recebe ao final de cada processamento</h2>
+            <p class="panel-text">
+                O app foi reorganizado para ficar mais legivel no Mac e mais claro para quem entra pela primeira vez.
+            </p>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <strong>Upload inteligente</strong>
+                    <span>Suporte para CSV, Excel e BibTeX com leitura automatica de campos bibliograficos.</span>
+                </div>
+                <div class="feature-card">
+                    <strong>Painel analitico</strong>
+                    <span>Metricas, ranking de autores, citacoes, crescimento anual e visoes prontas para leitura.</span>
+                </div>
+                <div class="feature-card">
+                    <strong>Visualizacoes executivas</strong>
+                    <span>Grafo de coautoria, nuvem de palavras, series temporais e imagens exportaveis.</span>
+                </div>
+                <div class="feature-card">
+                    <strong>Entrega em lote</strong>
+                    <span>Baixe ZIP com tabelas CSV, resumo JSON e figuras para apresentar ou continuar a analise.</span>
+                </div>
             </div>
-            <div class="feature-card">
-                <strong>Painel analitico</strong>
-                <span>Metricas, ranking de autores, citacoes, crescimento anual e visoes prontas para leitura.</span>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _render_process_steps():
+    st.markdown(
+        """
+        <section class="panel-shell">
+            <div class="panel-kicker">Fluxo guiado</div>
+            <h2 class="panel-title">Como usar sem se perder no meio do caminho</h2>
+            <p class="panel-text">
+                O app foi reorganizado para reduzir atrito: primeiro voce envia a base,
+                depois abre o workspace e navega pelos modulos da analise.
+            </p>
+            <div class="step-list">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div class="step-copy">
+                        <strong>Envie a base bibliografica</strong>
+                        <span>Use CSV, Excel ou BibTeX na central de envio.</span>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-copy">
+                        <strong>Rode a leitura analitica</strong>
+                        <span>O sistema gera tabelas, graficos, grafo de coautoria e nuvem de palavras.</span>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-copy">
+                        <strong>Explore e exporte</strong>
+                        <span>Revise os modulos do workspace e baixe tudo em ZIP quando finalizar.</span>
+                    </div>
+                </div>
             </div>
-            <div class="feature-card">
-                <strong>Visualizacoes executivas</strong>
-                <span>Grafo de coautoria, nuvem de palavras, series temporais e imagens exportaveis.</span>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _render_empty_workspace():
+    st.markdown(
+        """
+        <section class="empty-workspace">
+            <h3>Workspace pronto para receber a pesquisa</h3>
+            <p>
+                Assim que voce rodar a analise, esta area passa a mostrar indicadores,
+                tabelas, nuvem de palavras, grafo de coautoria, graficos e pacote para download.
+            </p>
+            <div class="mini-module-grid">
+                <div class="mini-module">
+                    <strong>Quadro da pesquisa</strong>
+                    <span>Resumo executivo com periodo, documentos e tabelas principais.</span>
+                </div>
+                <div class="mini-module">
+                    <strong>Nuvem de palavras</strong>
+                    <span>Termos mais frequentes combinando titulo e resumo.</span>
+                </div>
+                <div class="mini-module">
+                    <strong>Grafo e graficos</strong>
+                    <span>Rede de coautoria e visuais para apresentar resultados.</span>
+                </div>
+                <div class="mini-module">
+                    <strong>Download final</strong>
+                    <span>ZIP com CSVs, imagens e resumo JSON da analise.</span>
+                </div>
             </div>
-            <div class="feature-card">
-                <strong>Entrega em lote</strong>
-                <span>Baixe ZIP com tabelas CSV, resumo JSON e figuras para apresentar ou continuar a analise.</span>
-            </div>
-        </div>
+        </section>
         """,
         unsafe_allow_html=True,
     )
@@ -351,6 +600,13 @@ def _render_workspace_summary(
     chips = "".join(f'<div class="chip">{value}</div>' for value in chip_values)
     st.markdown(
         f"""
+        <section class="workspace-banner">
+            <strong>Workspace ativo</strong>
+            <span>
+                Sua analise foi processada e os modulos abaixo agora funcionam como uma area de trabalho unica,
+                sem precisar voltar para o upload a cada consulta.
+            </span>
+        </section>
         <section class="workspace-card">
             <h2 class="workspace-title">Workspace da analise</h2>
             <p class="workspace-text">
@@ -510,19 +766,29 @@ def main():
             for label, url in social_links.items():
                 st.markdown(f"- [{label}]({url})")
 
-    upload_col, info_col = st.columns([1.3, 0.7], gap="large")
-    with upload_col:
+    with st.container(border=True):
         st.subheader("Central de envio")
         st.caption("Carregue a base bibliografica e inicie a leitura analitica do workspace.")
-        uploaded_file = st.file_uploader(
-            "Arquivo bibliografico",
-            type=["csv", "xls", "xlsx", "bib"],
-            help="Aceita CSV, XLS, XLSX e BibTeX (.bib).",
-        )
-        run_button = st.button("Rodar analise", type="primary", disabled=uploaded_file is None)
-    with info_col:
-        st.subheader("Fluxo de trabalho")
-        st.caption("Uma jornada simples para transformar bases bibliograficas em evidencias visuais.")
+        upload_meta_col, upload_input_col = st.columns([0.38, 0.62], gap="large")
+        with upload_meta_col:
+            st.markdown("**Entradas aceitas**")
+            st.caption("CSV, Excel (`.xls` / `.xlsx`) e BibTeX (`.bib`).")
+            st.markdown("**Saidas do workspace**")
+            st.caption("Tabelas, grafo, nuvem de palavras, graficos e pacote ZIP.")
+            st.markdown("**Uso recomendado**")
+            st.caption("Envie a base, rode a leitura e depois navegue pelas abas do resultado.")
+        with upload_input_col:
+            uploaded_file = st.file_uploader(
+                "Arquivo bibliografico",
+                type=["csv", "xls", "xlsx", "bib"],
+                help="Aceita CSV, XLS, XLSX e BibTeX (.bib).",
+            )
+            run_button = st.button("Rodar analise", type="primary", disabled=uploaded_file is None)
+
+    guide_col, module_col = st.columns([1, 1], gap="large")
+    with guide_col:
+        _render_process_steps()
+    with module_col:
         _render_feature_cards()
 
     if run_button and uploaded_file is not None:
@@ -544,6 +810,7 @@ def main():
     results = st.session_state.get("results")
     if not results:
         st.info("Envie um arquivo e clique em 'Rodar analise' para abrir o workspace da pesquisa.")
+        _render_empty_workspace()
         return
 
     summary = results["summary"]
