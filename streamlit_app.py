@@ -357,6 +357,13 @@ def _inject_styles():
             font-weight: 600;
         }
 
+        .author-credit {
+            margin-top: 0.8rem;
+            color: var(--muted);
+            font-size: 0.96rem;
+            line-height: 1.55;
+        }
+
         .workspace-card {
             background: var(--bg-panel);
             border: 1px solid var(--line);
@@ -782,6 +789,7 @@ def _render_hero(social_links: Dict[str, str]):
                 indicadores, tabelas, grafo de coautoria, nuvem de palavras e pacotes
                 prontos para exportacao.
             </p>
+            <div class="author-credit">Criado pelo Bibliotecário e Advogado Lucas Martins</div>
             {social_html}
         </section>
         """,
