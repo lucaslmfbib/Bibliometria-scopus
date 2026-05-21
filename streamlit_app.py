@@ -53,6 +53,12 @@ def _inject_styles():
             color-scheme: light;
         }
 
+        *::selection {
+            background: rgba(181, 79, 45, 0.22);
+            color: var(--ink);
+            -webkit-text-fill-color: var(--ink);
+        }
+
         .stApp {
             background:
                 radial-gradient(circle at top left, rgba(181, 79, 45, 0.10), transparent 30%),
@@ -88,6 +94,59 @@ def _inject_styles():
         div[data-testid="stDataFrame"],
         div[data-testid="stTable"] {
             border-radius: var(--radius-md);
+        }
+
+        div[data-testid="stAlert"] {
+            background: rgba(255, 246, 204, 0.92) !important;
+            border: 1px solid rgba(181, 79, 45, 0.14) !important;
+            color: var(--ink) !important;
+        }
+
+        div[data-testid="stAlert"] *,
+        div[data-testid="stAlert"] p,
+        div[data-testid="stAlert"] span {
+            color: var(--ink) !important;
+            -webkit-text-fill-color: var(--ink) !important;
+        }
+
+        div[data-testid="stInfo"] {
+            background: rgba(230, 241, 248, 0.92) !important;
+        }
+
+        div[data-testid="stSuccess"] {
+            background: rgba(232, 244, 237, 0.92) !important;
+        }
+
+        div[data-testid="stError"] {
+            background: rgba(250, 232, 228, 0.94) !important;
+        }
+
+        div[data-testid="stTable"] {
+            background: rgba(255, 255, 255, 0.72) !important;
+            border: 1px solid var(--line) !important;
+            overflow: hidden;
+        }
+
+        div[data-testid="stTable"] table,
+        div[data-testid="stTable"] table * {
+            color: var(--ink) !important;
+            -webkit-text-fill-color: var(--ink) !important;
+            background: transparent !important;
+        }
+
+        div[data-testid="stTable"] th {
+            color: var(--muted) !important;
+            font-weight: 700 !important;
+        }
+
+        div[data-testid="stTable"] td,
+        div[data-testid="stTable"] th {
+            border-color: rgba(39, 31, 24, 0.08) !important;
+        }
+
+        div[data-testid="stDataFrame"] * {
+            color: var(--ink) !important;
+            -webkit-text-fill-color: var(--ink) !important;
         }
 
         div[data-testid="stFileUploader"] > section {
