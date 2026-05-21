@@ -1338,7 +1338,6 @@ def main():
         most_cited_table=most_cited_table,
         word_cloud_terms_table=word_cloud_terms_table,
     )
-    _render_quick_insights(quick_insights, quick_alerts)
     st.caption(f"Arestas de coautoria identificadas: {coauth_count}")
 
     tab_dashboard, tab_word_cloud, tab_graph, tab_tables, tab_plots, tab_raw, tab_download = st.tabs(
@@ -1532,6 +1531,9 @@ def main():
             file_name="analysis_output.zip",
             mime="application/zip",
         )
+
+    st.divider()
+    _render_quick_insights(quick_insights, quick_alerts)
 
 
 if __name__ == "__main__":
