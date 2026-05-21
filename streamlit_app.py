@@ -345,9 +345,16 @@ def _inject_styles():
         }
 
         .author-note {
-            margin-top: 0.7rem;
-            color: var(--muted);
-            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            margin: 0 0 0.9rem 0;
+            padding: 0.5rem 0.85rem;
+            color: var(--accent);
+            background: rgba(181, 79, 45, 0.08);
+            border: 1px solid rgba(181, 79, 45, 0.16);
+            border-radius: 999px;
+            font-size: 0.92rem;
+            font-weight: 600;
         }
 
         .workspace-card {
@@ -768,13 +775,13 @@ def _render_hero(social_links: Dict[str, str]):
         f"""
         <section class="hero-shell">
             <div class="hero-badge">Plataforma de Analise Bibliometrica</div>
+            <div class="author-note">Criado pelo Bibliotecário e Advogado Lucas Martins</div>
             <h1 class="hero-title">Bibliometria em nuvem, com cara de software.</h1>
             <p class="hero-subtitle">
                 Envie um arquivo CSV, Excel ou BibTeX e trabalhe em um painel unico com
                 indicadores, tabelas, grafo de coautoria, nuvem de palavras e pacotes
                 prontos para exportacao.
             </p>
-            <div class="author-note">Criado pelo Bibliotecário e Advogado Lucas Martins</div>
             {social_html}
         </section>
         """,
