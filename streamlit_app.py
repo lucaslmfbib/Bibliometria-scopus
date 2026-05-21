@@ -529,6 +529,84 @@ def _inject_styles():
             font-size: 0.92rem;
         }
 
+        .insights-shell {
+            margin: 0.4rem 0 1rem 0;
+        }
+
+        .insights-header {
+            margin-bottom: 0.8rem;
+        }
+
+        .insights-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .insights-header p {
+            margin: 0.35rem 0 0 0;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.8rem;
+        }
+
+        .insight-card {
+            background: rgba(255, 250, 243, 0.95);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow);
+            padding: 0.95rem 1rem;
+        }
+
+        .insight-title {
+            display: block;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .insight-value {
+            display: block;
+            color: var(--ink);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.18rem;
+            line-height: 1.2;
+            margin-top: 0.45rem;
+        }
+
+        .insight-note {
+            display: block;
+            color: var(--muted);
+            font-size: 0.9rem;
+            line-height: 1.55;
+            margin-top: 0.45rem;
+        }
+
+        .insight-alerts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 0.85rem;
+        }
+
+        .insight-alert-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid rgba(181, 79, 45, 0.16);
+            background: rgba(181, 79, 45, 0.08);
+            color: var(--accent);
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -795,6 +873,184 @@ def _empty_table_reason(table_name: str) -> str:
     )
 
 
+def _to_float(value: Any) -> float | None:
+    try:
+        if value is None:
+            return None
+        text = str(value).strip()
+        if not text or text.lower() == "nan":
+            return None
+        return float(text)
+    except Exception:
+        return None
+
+
+def _to_int(value: Any) -> int | None:
+    number = _to_float(value)
+    if number is None:
+        return None
+    return int(round(number))
+
+
+def _overview_lookup(overview_table: pd.DataFrame) -> Dict[str, Any]:
+    if overview_table.empty:
+        return {}
+    if not {"indicador", "valor"}.issubset(overview_table.columns):
+        return {}
+    return {
+        str(row["indicador"]).strip(): row["valor"]
+        for _, row in overview_table.iterrows()
+    }
+
+
+def _build_quick_insights(
+    summary: Dict[str, Any],
+    overview_table: pd.DataFrame,
+    author_documents_table: pd.DataFrame,
+    most_cited_table: pd.DataFrame,
+    word_cloud_terms_table: pd.DataFrame,
+) -> tuple[list[dict[str, str]], list[str]]:
+    overview = _overview_lookup(overview_table)
+    total_documents = _to_int(overview.get("Total de documentos")) or _to_int(summary.get("total_documents")) or 0
+    docs_with_abstract = _to_int(overview.get("Documentos com resumo")) or 0
+    docs_with_keywords = _to_int(overview.get("Documentos com palavras-chave")) or 0
+    docs_with_citations = _to_int(overview.get("Documentos com citacoes")) or 0
+    unique_authors = _to_int(overview.get("Autores unicos")) or 0
+    unique_journals = _to_int(overview.get("Periodicos unicos")) or 0
+    total_citations = _to_float(overview.get("Total de citacoes")) or 0.0
+    mean_citations = _to_float(overview.get("Media de citacoes por documento")) or 0.0
+    period = str(overview.get("Periodo") or "-")
+    coauth_edges = len(summary.get("coauthorship_edges", []))
+
+    abstract_pct = round((docs_with_abstract / total_documents) * 100) if total_documents else 0
+    keyword_pct = round((docs_with_keywords / total_documents) * 100) if total_documents else 0
+    cited_pct = round((docs_with_citations / total_documents) * 100) if total_documents else 0
+
+    yearly_counts = summary.get("yearly_counts", {}) or {}
+    peak_year = "-"
+    peak_note = "Sem serie temporal suficiente."
+    if yearly_counts:
+        peak_year_value, peak_count = max(yearly_counts.items(), key=lambda item: item[1])
+        peak_year = str(peak_year_value)
+        peak_note = f"Pico de publicacoes em {peak_year} ({peak_count} registros)."
+
+    collab_value = f"{coauth_edges} arestas"
+    collab_note = "Sem rede de coautoria robusta."
+    if coauth_edges > 0 and unique_authors > 0:
+        avg_docs_per_author = round(total_documents / unique_authors, 2) if unique_authors else 0
+        collab_note = f"{unique_authors} autores unicos | media de {avg_docs_per_author} documento(s) por autor."
+    if not author_documents_table.empty and {"author", "documents"}.issubset(author_documents_table.columns):
+        top_authors = author_documents_table.copy()
+        top_authors["documents"] = pd.to_numeric(top_authors["documents"], errors="coerce")
+        top_docs = top_authors["documents"].dropna()
+        if not top_docs.empty:
+            top5_share = round((top_docs.nlargest(min(5, len(top_docs))).sum() / max(top_docs.sum(), 1)) * 100)
+            collab_note = f"{collab_note} Top 5 autores concentram {top5_share}% das assinaturas."
+
+    impact_value = f"{cited_pct}% citados"
+    impact_note = f"{docs_with_citations} de {total_documents} documentos possuem citacoes validas."
+    if not most_cited_table.empty and {"title", "citations"}.issubset(most_cited_table.columns):
+        top_row = most_cited_table.copy()
+        top_row["citations"] = pd.to_numeric(top_row["citations"], errors="coerce")
+        top_row = top_row.sort_values(by="citations", ascending=False, na_position="last")
+        if not top_row.empty and pd.notna(top_row.iloc[0]["citations"]):
+            top_title = str(top_row.iloc[0].get("title") or "Documento principal").strip()
+            top_citations = int(top_row.iloc[0]["citations"])
+            impact_note = f"Mais citado: {top_title[:65]}{'...' if len(top_title) > 65 else ''} ({top_citations} citacoes)."
+
+    theme_value = "Sem termos"
+    theme_note = "Nao houve termos suficientes em titulo e resumo."
+    if not word_cloud_terms_table.empty and {"term", "count"}.issubset(word_cloud_terms_table.columns):
+        top_terms = word_cloud_terms_table.copy()
+        top_terms["count"] = pd.to_numeric(top_terms["count"], errors="coerce")
+        top_terms = top_terms.sort_values(by="count", ascending=False, na_position="last")
+        if not top_terms.empty and pd.notna(top_terms.iloc[0]["count"]):
+            term = str(top_terms.iloc[0]["term"])
+            count = int(top_terms.iloc[0]["count"])
+            theme_value = term
+            theme_note = f"Termo mais recorrente com {count} ocorrencia(s) na combinacao de titulo e resumo."
+
+    insights = [
+        {
+            "title": "Cobertura da base",
+            "value": f"{abstract_pct}% com resumo",
+            "note": f"{keyword_pct}% com palavras-chave | {unique_journals} periodico(s) identificado(s).",
+        },
+        {
+            "title": "Recorte temporal",
+            "value": period,
+            "note": peak_note,
+        },
+        {
+            "title": "Colaboracao",
+            "value": collab_value,
+            "note": collab_note,
+        },
+        {
+            "title": "Impacto",
+            "value": impact_value,
+            "note": (
+                f"{impact_note} Media geral: {mean_citations:.1f}."
+                if docs_with_citations or total_citations or mean_citations
+                else "Sem citacoes validas na base atual."
+            ),
+        },
+        {
+            "title": "Tema dominante",
+            "value": theme_value,
+            "note": theme_note,
+        },
+    ]
+
+    alerts: list[str] = []
+    if total_documents and docs_with_abstract == 0:
+        alerts.append("Base sem resumos validos; a nuvem de palavras pode ficar limitada.")
+    if total_documents and docs_with_keywords == 0:
+        alerts.append("Base sem palavras-chave validas; a cobertura tematica pode estar incompleta.")
+    if docs_with_citations == 0:
+        alerts.append("Citacoes indisponiveis ou nao reconhecidas; rankings de impacto ficam limitados.")
+    if unique_journals == 0:
+        alerts.append("Periodicos nao foram reconhecidos na base atual.")
+    if coauth_edges == 0:
+        alerts.append("Sem coautorias suficientes para uma rede de colaboracao mais rica.")
+    if total_documents and unique_authors > total_documents * 2:
+        alerts.append("A base tem alta dispersao de autores; vale revisar o padrao de nomes.")
+
+    return insights, alerts
+
+
+def _render_quick_insights(insights: list[dict[str, str]], alerts: list[str]):
+    cards_html = "".join(
+        f"""
+        <div class="insight-card">
+            <span class="insight-title">{item['title']}</span>
+            <span class="insight-value">{item['value']}</span>
+            <span class="insight-note">{item['note']}</span>
+        </div>
+        """
+        for item in insights
+    )
+    alerts_html = ""
+    if alerts:
+        alerts_html = '<div class="insight-alerts">' + "".join(
+            f'<div class="insight-alert-chip">{alert}</div>' for alert in alerts
+        ) + "</div>"
+
+    st.markdown(
+        f"""
+        <section class="insights-shell">
+            <div class="insights-header">
+                <h3>Insights rapidos</h3>
+                <p>Leituras automaticas da base, geradas sem processamento extra pesado.</p>
+            </div>
+            <div class="insights-grid">{cards_html}</div>
+            {alerts_html}
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def _render_workspace_summary(
     upload_name: str,
     total_documents: Any,
@@ -1039,6 +1295,14 @@ def main():
         table_count=len(tables),
         plot_count=len(results["plots"]),
     )
+    quick_insights, quick_alerts = _build_quick_insights(
+        summary=summary,
+        overview_table=overview_table,
+        author_documents_table=author_documents_table,
+        most_cited_table=most_cited_table,
+        word_cloud_terms_table=word_cloud_terms_table,
+    )
+    _render_quick_insights(quick_insights, quick_alerts)
     st.caption(f"Arestas de coautoria identificadas: {coauth_count}")
 
     tab_dashboard, tab_word_cloud, tab_graph, tab_tables, tab_plots, tab_raw, tab_download = st.tabs(
