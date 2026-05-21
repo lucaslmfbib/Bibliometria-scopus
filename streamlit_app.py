@@ -46,6 +46,11 @@ def _inject_styles():
             --shadow: 0 20px 60px rgba(41, 26, 17, 0.08);
             --radius-lg: 24px;
             --radius-md: 18px;
+            color-scheme: light;
+        }
+
+        html, body, [data-testid="stAppViewContainer"], .stApp {
+            color-scheme: light;
         }
 
         .stApp {
@@ -83,6 +88,54 @@ def _inject_styles():
         div[data-testid="stDataFrame"],
         div[data-testid="stTable"] {
             border-radius: var(--radius-md);
+        }
+
+        div[data-testid="stFileUploader"] > section {
+            background: rgba(255, 250, 243, 0.98) !important;
+            border: 1px solid var(--line) !important;
+            box-shadow: var(--shadow);
+            padding: 0.35rem;
+        }
+
+        div[data-testid="stFileUploader"] label,
+        div[data-testid="stFileUploader"] p,
+        div[data-testid="stFileUploader"] small,
+        div[data-testid="stFileUploader"] span {
+            color: var(--ink) !important;
+        }
+
+        div[data-testid="stFileUploaderDropzone"] {
+            background: rgba(255, 255, 255, 0.86) !important;
+            border: 1px dashed rgba(39, 31, 24, 0.18) !important;
+            border-radius: 18px !important;
+        }
+
+        div[data-testid="stFileUploaderDropzoneInstructions"] div,
+        div[data-testid="stFileUploaderDropzoneInstructions"] span,
+        div[data-testid="stFileUploaderDropzoneInstructions"] small {
+            color: var(--ink) !important;
+        }
+
+        div[data-testid="stFileUploader"] button {
+            background: rgba(255, 255, 255, 0.96) !important;
+            color: var(--ink) !important;
+            border: 1px solid var(--line) !important;
+            box-shadow: none !important;
+        }
+
+        div[data-testid="stFileUploader"] button:hover {
+            border-color: rgba(181, 79, 45, 0.28) !important;
+            color: var(--accent) !important;
+        }
+
+        div[data-testid="stFileUploader"] [data-testid="stFileUploaderFile"] {
+            background: rgba(255, 255, 255, 0.92) !important;
+            border: 1px solid var(--line) !important;
+            border-radius: 14px !important;
+        }
+
+        div[data-testid="stFileUploader"] [data-testid="stFileUploaderFile"] * {
+            color: var(--ink) !important;
         }
 
         .hero-shell {
