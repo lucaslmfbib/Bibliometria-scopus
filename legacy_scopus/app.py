@@ -19,6 +19,8 @@ API_URL = "https://api.elsevier.com/content/search/scopus"
 ABSTRACT_API_URL = "https://api.elsevier.com/content/abstract/eid/{eid}"
 DEFAULT_QUERY = 'TITLE-ABS-KEY ("inteligencia artificial" AND bibliotecas)'
 APP_VERSION = "2026-03-05-resumo-api-scopus"
+SAMPLE_QUERY = "Dataset ficticio de demonstracao publica"
+SAMPLE_DATASET_FILENAME = "dataset_teste_publico_bibliometria_scopus.xlsx"
 
 STOPWORDS = {
     "a", "as", "o", "os", "de", "da", "das", "do", "dos", "e", "em", "no", "na", "nos", "nas",
@@ -120,6 +122,165 @@ def to_excel_bytes(df: pd.DataFrame) -> bytes:
     with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
         df.to_excel(writer, index=False, sheet_name="bibliometria")
     return buffer.getvalue()
+
+
+def build_sample_dataset() -> pd.DataFrame:
+    rows = [
+        {
+            "eid": "2-s2.0-000000001",
+            "titulo": "Artificial intelligence in judicial analytics",
+            "autor": "Ana Costa",
+            "data": "2019-05-10",
+            "periodico": "Journal of Legal Data Studies",
+            "tipo": "Article",
+            "citacoes": 18,
+            "doi": "10.1000/jlds.2019.001",
+            "url_scopus": "https://www.scopus.com/record/display.uri?eid=2-s2.0-000000001",
+            "ano": 2019,
+            "resumo_artigo_scopus": "Explora apoio analitico orientado por dados para gestao judicial e leitura bibliometrica.",
+        },
+        {
+            "eid": "2-s2.0-000000002",
+            "titulo": "Open data practices for bibliometric dashboards",
+            "autor": "Bruno Lima",
+            "data": "2020-03-18",
+            "periodico": "Information Metrics Review",
+            "tipo": "Article",
+            "citacoes": 24,
+            "doi": "10.1000/imr.2020.002",
+            "url_scopus": "https://www.scopus.com/record/display.uri?eid=2-s2.0-000000002",
+            "ano": 2020,
+            "resumo_artigo_scopus": "Discute boas praticas de dados abertos para dashboards bibliometricos e acompanhamento de resultados.",
+        },
+        {
+            "eid": "2-s2.0-000000003",
+            "titulo": "Research trends in digital justice platforms",
+            "autor": "Carla Souza",
+            "data": "2021-01-27",
+            "periodico": "Digital Governance Quarterly",
+            "tipo": "Review",
+            "citacoes": 31,
+            "doi": "10.1000/dgq.2021.003",
+            "url_scopus": "https://www.scopus.com/record/display.uri?eid=2-s2.0-000000003",
+            "ano": 2021,
+            "resumo_artigo_scopus": "Mapeia tendencias de publicacao sobre plataformas de justica digital e servicos publicos.",
+        },
+        {
+            "eid": "2-s2.0-000000004",
+            "titulo": "Coauthorship networks in health law research",
+            "autor": "Diego Melo",
+            "data": "2021-08-04",
+            "periodico": "Health Policy and Law Insights",
+            "tipo": "Article",
+            "citacoes": 15,
+            "doi": "10.1000/hpli.2021.004",
+            "url_scopus": "https://www.scopus.com/record/display.uri?eid=2-s2.0-000000004",
+            "ano": 2021,
+            "resumo_artigo_scopus": "Analisa redes de colaboracao e coautoria em pesquisas sobre direito e saude.",
+        },
+        {
+            "eid": "2-s2.0-000000005",
+            "titulo": "Keyword evolution in access to justice studies",
+            "autor": "Elisa Rocha",
+            "data": "2022-02-11",
+            "periodico": "Access and Society",
+            "tipo": "Article",
+            "citacoes": 27,
+            "doi": "10.1000/as.2022.005",
+            "url_scopus": "https://www.scopus.com/record/display.uri?eid=2-s2.0-000000005",
+            "ano": 2022,
+            "resumo_artigo_scopus": "Acompanha a evolucao de palavras-chave em estudos sobre acesso a justica.",
+        },
+        {
+            "eid": "2-s2.0-000000006",
+            "titulo": "Measuring citation impact in empirical legal studies",
+            "autor": "Fabio Nunes",
+            "data": "2022-09-22",
+            "periodico": "Empirical Law Review",
+            "tipo": "Article",
+            "citacoes": 22,
+            "doi": "10.1000/elr.2022.006",
+            "url_scopus": "https://www.scopus.com/record/display.uri?eid=2-s2.0-000000006",
+            "ano": 2022,
+            "resumo_artigo_scopus": "Apresenta indicadores para medir impacto de citacoes em estudos juridicos empiricos.",
+        },
+        {
+            "eid": "2-s2.0-000000007",
+            "titulo": "Automation support for literature screening",
+            "autor": "Gabriela Teixeira",
+            "data": "2023-04-09",
+            "periodico": "Scholarly Workflow Journal",
+            "tipo": "Conference Paper",
+            "citacoes": 12,
+            "doi": "10.1000/swj.2023.007",
+            "url_scopus": "https://www.scopus.com/record/display.uri?eid=2-s2.0-000000007",
+            "ano": 2023,
+            "resumo_artigo_scopus": "Mostra como automacao pode acelerar triagem e organizacao de literatura cientifica.",
+        },
+        {
+            "eid": "2-s2.0-000000008",
+            "titulo": "Visualization patterns for bibliometric evidence",
+            "autor": "Henrique Alves",
+            "data": "2023-07-14",
+            "periodico": "Visual Analytics Reports",
+            "tipo": "Article",
+            "citacoes": 16,
+            "doi": "10.1000/var.2023.008",
+            "url_scopus": "https://www.scopus.com/record/display.uri?eid=2-s2.0-000000008",
+            "ano": 2023,
+            "resumo_artigo_scopus": "Compara padroes de visualizacao para comunicar evidencias bibliometricas com clareza.",
+        },
+        {
+            "eid": "2-s2.0-000000009",
+            "titulo": "Academic production on civic technology and courts",
+            "autor": "Isabela Ramos",
+            "data": "2024-01-16",
+            "periodico": "Civic Tech Review",
+            "tipo": "Review",
+            "citacoes": 9,
+            "doi": "10.1000/ctr.2024.009",
+            "url_scopus": "https://www.scopus.com/record/display.uri?eid=2-s2.0-000000009",
+            "ano": 2024,
+            "resumo_artigo_scopus": "Revisa a producao academica sobre tecnologia civica aplicada aos tribunais.",
+        },
+        {
+            "eid": "2-s2.0-000000010",
+            "titulo": "Text mining strategies for legal abstracts",
+            "autor": "Joao Pedro Martins",
+            "data": "2024-06-03",
+            "periodico": "Computational Research Methods",
+            "tipo": "Article",
+            "citacoes": 11,
+            "doi": "10.1000/crm.2024.010",
+            "url_scopus": "https://www.scopus.com/record/display.uri?eid=2-s2.0-000000010",
+            "ano": 2024,
+            "resumo_artigo_scopus": "Aplica estrategias de mineracao de texto a resumos juridicos em bases academicas.",
+        },
+    ]
+    return pd.DataFrame(rows)
+
+
+def render_sample_dataset_panel() -> bytes:
+    sample_df = build_sample_dataset()
+    sample_bytes = to_excel_bytes(sample_df)
+
+    with st.expander("Base de exemplo publica para teste", expanded=False):
+        st.caption(
+            "Dataset ficticio e discreto para qualquer pessoa testar o app sem depender de chave da API."
+        )
+        st.dataframe(sample_df.head(6), use_container_width=True, hide_index=True)
+        st.download_button(
+            "Baixar planilha modelo",
+            data=sample_bytes,
+            file_name=SAMPLE_DATASET_FILENAME,
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True,
+        )
+        st.caption(
+            "Se preferir, use o botao de teste na barra lateral para abrir o dashboard completo com esse exemplo."
+        )
+
+    return sample_bytes
 
 
 def show_rank_chart(
@@ -409,54 +570,79 @@ def main() -> None:
             disabled=not include_article_abstracts,
         )
         run = st.button("Buscar e analisar", type="primary", use_container_width=True)
+        sample_run = st.button(
+            "Testar com dataset ficticio",
+            use_container_width=True,
+            help="Abre a analise com uma planilha publica de exemplo, sem usar a API.",
+        )
 
-    if not run:
+    sample_bytes = render_sample_dataset_panel()
+
+    if not run and not sample_run:
         st.info("Preencha os campos e clique em 'Buscar e analisar'.")
         return
 
-    if not api_key.strip():
-        st.error("Informe sua chave da API Elsevier.")
-        return
-    if not query.strip():
-        st.error("Informe uma consulta Scopus.")
-        return
+    using_sample_dataset = sample_run
 
-    try:
-        with st.spinner("Consultando API do Scopus..."):
-            result = search_scopus(api_key.strip(), query.strip(), count, max_results)
-        df = normalize_df(result.entries)
+    if using_sample_dataset:
+        df_display = build_sample_dataset()
+        df = df_display.copy()
+        result = SearchResult(total_results=len(df_display), entries=[])
+    else:
+        if not api_key.strip():
+            st.error("Informe sua chave da API Elsevier.")
+            return
+        if not query.strip():
+            st.error("Informe uma consulta Scopus.")
+            return
+
+        try:
+            with st.spinner("Consultando API do Scopus..."):
+                result = search_scopus(api_key.strip(), query.strip(), count, max_results)
+            df = normalize_df(result.entries)
+            if include_article_abstracts:
+                limit = min(abstract_limit, len(df))
+                with st.spinner("Consultando resumos dos artigos na API da Scopus..."):
+                    df_display = add_article_abstract_column(api_key.strip(), df, limit)
+            else:
+                df_display = df.copy()
+                df_display["resumo_artigo_scopus"] = "Consulta de resumo desativada."
+        except requests.HTTPError as exc:
+            status = exc.response.status_code if exc.response else "?"
+            st.error(f"Erro HTTP na API Scopus: {status}")
+            return
+        except requests.RequestException as exc:
+            st.error(f"Erro de conexão: {exc}")
+            return
+        except Exception as exc:  # noqa: BLE001
+            st.error(f"Erro inesperado: {exc}")
+            return
+
+    if using_sample_dataset:
+        st.success(f"Dataset ficticio carregado: {len(df_display)} documentos prontos para teste publico.")
+        st.caption("Este modo nao consulta a API e serve apenas para demonstracao do fluxo.")
+        st.download_button(
+            "Baixar planilha modelo usada no teste",
+            data=sample_bytes,
+            file_name=SAMPLE_DATASET_FILENAME,
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True,
+        )
+    else:
+        st.success(f"Documentos coletados: {len(df)} (total no Scopus: {result.total_results})")
         if include_article_abstracts:
-            limit = min(abstract_limit, len(df))
-            with st.spinner("Consultando resumos dos artigos na API da Scopus..."):
-                df_display = add_article_abstract_column(api_key.strip(), df, limit)
-        else:
-            df_display = df.copy()
-            df_display["resumo_artigo_scopus"] = "Consulta de resumo desativada."
-    except requests.HTTPError as exc:
-        status = exc.response.status_code if exc.response else "?"
-        st.error(f"Erro HTTP na API Scopus: {status}")
-        return
-    except requests.RequestException as exc:
-        st.error(f"Erro de conexão: {exc}")
-        return
-    except Exception as exc:  # noqa: BLE001
-        st.error(f"Erro inesperado: {exc}")
-        return
+            consultados = min(abstract_limit, len(df))
+            obtidos = (
+                df_display["resumo_artigo_scopus"]
+                .astype(str)
+                .str.contains("na API para este trabalho|nao consultado|EID|Erro temporario|Sem permissao|Limite de requisicoes", case=False, regex=True)
+                .pipe(lambda series: int((~series).sum()))
+            )
+            st.caption(f"Resumos de artigos consultados: {consultados}. Resumos obtidos: {obtidos}.")
 
     if df.empty:
         st.warning("Nenhum documento retornado para essa busca.")
         return
-
-    st.success(f"Documentos coletados: {len(df)} (total no Scopus: {result.total_results})")
-    if include_article_abstracts:
-        consultados = min(abstract_limit, len(df))
-        obtidos = (
-            df_display["resumo_artigo_scopus"]
-            .astype(str)
-            .str.contains("na API para este trabalho|nao consultado|EID|Erro temporario|Sem permissao|Limite de requisicoes", case=False, regex=True)
-            .pipe(lambda series: int((~series).sum()))
-        )
-        st.caption(f"Resumos de artigos consultados: {consultados}. Resumos obtidos: {obtidos}.")
 
     docs = len(df)
     total_cit = int(df["citacoes"].sum()) if "citacoes" in df.columns else 0
@@ -514,7 +700,7 @@ def main() -> None:
             termos_df = termos
 
     summary_text = build_search_summary(
-        query=query.strip(),
+        query=SAMPLE_QUERY if using_sample_dataset else query.strip(),
         docs=docs,
         total_scopus=result.total_results,
         total_cit=total_cit,
