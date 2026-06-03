@@ -27,6 +27,9 @@ TOP_SOCIAL_LINKS = {
     "Instagram": "https://www.instagram.com/lucaslmf_/",
 }
 
+SAMPLE_DATASET_FILENAME = "dataset_exemplo_bibliometria.xlsx"
+SAMPLE_DATASET_SHEET = "Artigos"
+
 
 def _inject_styles():
     st.markdown(
@@ -924,6 +927,144 @@ def _render_upload_notes():
     )
 
 
+def _build_sample_dataset() -> pd.DataFrame:
+    rows = [
+        {
+            "Authors": "Ana Costa; Bruno Lima",
+            "Title": "Artificial intelligence in judicial analytics",
+            "Year": 2019,
+            "Journal": "Journal of Legal Data Studies",
+            "Keywords": "artificial intelligence; legal analytics; courts",
+            "Abstract": "Explores data driven support for court management and legal analytics.",
+            "Cited by": 18,
+        },
+        {
+            "Authors": "Carla Souza; Diego Melo",
+            "Title": "Open data practices for bibliometric dashboards",
+            "Year": 2020,
+            "Journal": "Information Metrics Review",
+            "Keywords": "open data; bibliometrics; dashboard",
+            "Abstract": "Discusses transparent workflows for publishing bibliometric dashboards.",
+            "Cited by": 24,
+        },
+        {
+            "Authors": "Elisa Rocha; Fabio Nunes",
+            "Title": "Research trends in digital justice platforms",
+            "Year": 2021,
+            "Journal": "Digital Governance Quarterly",
+            "Keywords": "digital justice; platform studies; governance",
+            "Abstract": "Maps publication trends around digital justice and public service platforms.",
+            "Cited by": 31,
+        },
+        {
+            "Authors": "Gabriela Teixeira; Henrique Alves",
+            "Title": "Coauthorship networks in health law research",
+            "Year": 2021,
+            "Journal": "Health Policy and Law Insights",
+            "Keywords": "coauthorship; health law; network analysis",
+            "Abstract": "Examines collaboration structures in health law and policy literature.",
+            "Cited by": 15,
+        },
+        {
+            "Authors": "Isabela Ramos; Joao Pedro Martins",
+            "Title": "Keyword evolution in access to justice studies",
+            "Year": 2022,
+            "Journal": "Access and Society",
+            "Keywords": "access to justice; keyword analysis; social impact",
+            "Abstract": "Tracks keyword changes in access to justice publications over time.",
+            "Cited by": 27,
+        },
+        {
+            "Authors": "Karina Duarte; Lucas Ferreira",
+            "Title": "Measuring citation impact in empirical legal studies",
+            "Year": 2022,
+            "Journal": "Empirical Law Review",
+            "Keywords": "citation analysis; empirical law; metrics",
+            "Abstract": "Presents indicators for measuring citation impact in legal studies.",
+            "Cited by": 22,
+        },
+        {
+            "Authors": "Marina Santos; Natalia Freire",
+            "Title": "Automation support for literature screening",
+            "Year": 2023,
+            "Journal": "Scholarly Workflow Journal",
+            "Keywords": "automation; literature review; screening",
+            "Abstract": "Shows how automation can accelerate literature screening and curation.",
+            "Cited by": 12,
+        },
+        {
+            "Authors": "Otavio Campos; Paula Vieira",
+            "Title": "Visualization patterns for bibliometric evidence",
+            "Year": 2023,
+            "Journal": "Visual Analytics Reports",
+            "Keywords": "visualization; evidence synthesis; bibliometric maps",
+            "Abstract": "Compares visual patterns for communicating bibliometric evidence clearly.",
+            "Cited by": 16,
+        },
+        {
+            "Authors": "Rafaela Pinto; Thiago Gomes",
+            "Title": "Academic production on civic technology and courts",
+            "Year": 2024,
+            "Journal": "Civic Tech Review",
+            "Keywords": "civic technology; courts; public innovation",
+            "Abstract": "Reviews academic production about civic technology applications in courts.",
+            "Cited by": 9,
+        },
+        {
+            "Authors": "Viviane Barros; Wagner Lopes",
+            "Title": "Text mining strategies for legal abstracts",
+            "Year": 2024,
+            "Journal": "Computational Research Methods",
+            "Keywords": "text mining; legal abstracts; computational methods",
+            "Abstract": "Applies text mining strategies to legal abstracts in scholarly databases.",
+            "Cited by": 11,
+        },
+    ]
+    return pd.DataFrame(rows)
+
+
+@st.cache_data(show_spinner=False)
+def _build_sample_dataset_workbook() -> bytes:
+    sample_df = _build_sample_dataset()
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+        sample_df.to_excel(writer, index=False, sheet_name=SAMPLE_DATASET_SHEET)
+    return buffer.getvalue()
+
+
+def _render_sample_dataset_actions() -> tuple[bool, bytes]:
+    sample_df = _build_sample_dataset()
+    sample_bytes = _build_sample_dataset_workbook()
+
+    with st.expander("Base de exemplo para teste", expanded=False):
+        st.caption(
+            "Planilha ficticia e discreta para validar o fluxo sem preparar um arquivo do zero."
+        )
+        st.dataframe(sample_df.head(6), width="stretch", hide_index=True)
+
+        download_col, run_col = st.columns(2)
+        with download_col:
+            st.download_button(
+                "Baixar planilha modelo",
+                data=sample_bytes,
+                file_name=SAMPLE_DATASET_FILENAME,
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+            )
+        with run_col:
+            use_sample = st.button(
+                "Rodar com exemplo",
+                use_container_width=True,
+                help="Usa essa base ficticia para testar a pagina rapidamente.",
+            )
+
+        st.caption(
+            "A aba vem como 'Artigos' e inclui colunas como Authors, Title, Year, Journal, Keywords, Abstract e Cited by."
+        )
+
+    return use_sample, sample_bytes
+
+
 def _empty_table_reason(table_name: str) -> str:
     reasons = {
         "abstract_terms.csv": "Esta tabela fica vazia quando a base nao traz resumos utilizaveis ou quando os resumos nao possuem termos suficientes apos a limpeza.",
@@ -1333,16 +1474,26 @@ def main():
         )
         run_button = st.button("Rodar analise", type="primary", disabled=uploaded_file is None)
         _render_upload_notes()
+        sample_run_requested, sample_upload_bytes = _render_sample_dataset_actions()
 
-    if run_button and uploaded_file is not None:
+    if sample_run_requested or (run_button and uploaded_file is not None):
         with st.spinner("Processando analise bibliometrica..."):
             try:
+                if sample_run_requested:
+                    upload_name = SAMPLE_DATASET_FILENAME
+                    upload_bytes = sample_upload_bytes
+                    sheet_name_to_use = SAMPLE_DATASET_SHEET
+                else:
+                    upload_name = uploaded_file.name
+                    upload_bytes = uploaded_file.getvalue()
+                    sheet_name_to_use = sheet_name
+
                 st.session_state["results"] = _run_analysis(
-                    upload_name=uploaded_file.name,
-                    upload_bytes=uploaded_file.getvalue(),
+                    upload_name=upload_name,
+                    upload_bytes=upload_bytes,
                     top_n=top_n,
                     encoding=encoding,
-                    sheet_name_raw=sheet_name,
+                    sheet_name_raw=sheet_name_to_use,
                     generate_plots=generate_plots,
                     network_max_authors=network_max_authors,
                     network_min_weight=network_min_weight,
